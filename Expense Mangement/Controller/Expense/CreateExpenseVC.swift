@@ -176,9 +176,7 @@ class CreateExpenseVC: UIViewController, UINavigationControllerDelegate {
             expense.setValue(dateTF.text, forKey: "date")
             expense.setValue(currentDate, forKey: "createdAt")
             expense.setValue(currentDate, forKey: "updatedAt")
-            
-                
-            
+                        
             do {
                 try managedContext.save()
                 debugPrint("Data Saved")
@@ -194,7 +192,6 @@ class CreateExpenseVC: UIViewController, UINavigationControllerDelegate {
                 debugPrint("error", error)
             }
         }
-        
     }
     
     
@@ -263,14 +260,10 @@ class CreateExpenseVC: UIViewController, UINavigationControllerDelegate {
                 
                 self.expenseArr.append(obj)
             }
-            
-            
         } catch let error as NSError {
             debugPrint(error)
         }
     }
-
-    
 }
 
 

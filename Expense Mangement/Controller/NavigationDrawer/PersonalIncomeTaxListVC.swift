@@ -130,18 +130,11 @@ class PersonalIncomeTaxListVC: UIViewController {
         }
     }
     
-    // calculate tax amount
-    func calculateSalaryTax (percentageVal:Double, incomeAmount:Double)->Double {
+    // calculate tax rate
+    func calculateTaxRate (percentageVal:Double, incomeAmount:Double)->Double {
         let per = percentageVal / 100.0
         let taxRate = incomeAmount * per
         return taxRate
-    }
-    
-    
-    // calculate tax bonus
-    func calculateBonusTax(percentageVal: Double, incomeAmount: Double)->Double {
-        let taxBonusRate = incomeAmount * percentageVal 
-        return taxBonusRate
     }
     
     // calculate total tax amoumt
@@ -196,35 +189,35 @@ extension PersonalIncomeTaxListVC: UITableViewDataSource, UITableViewDelegate {
                 cell.taxAmount.text = "0"
                 cell.totalAmount.text = curFormat.string(from: income.amount! as NSNumber)
             } else if (income.amount! >= 2000001 && income.amount! <= 5000000) {
-                let res = calculateSalaryTax(percentageVal: 5, incomeAmount: Double(income.amount!))
+                let res = calculateTaxRate(percentageVal: 5, incomeAmount: Double(income.amount!))
                 cell.taxAmount.text = curFormat.string(from: res as NSNumber)
                 let totaRes = calTotalAmt(tax: res, incomeAmount: Double(income.amount!))
                 cell.totalAmount.text = curFormat.string(from: totaRes as NSNumber)
             } else if (income.amount! >= 5000001 && income.amount! <= 10000000) {
-                let res = calculateSalaryTax(percentageVal: 10, incomeAmount: Double(income.amount!))
+                let res = calculateTaxRate(percentageVal: 10, incomeAmount: Double(income.amount!))
                 cell.taxAmount.text = curFormat.string(from: res as NSNumber)
                 let totaRes = calTotalAmt(tax: res, incomeAmount: Double(income.amount!))
                 cell.totalAmount.text = curFormat.string(from: totaRes as NSNumber)
             } else if (income.amount! >= 10000001 && income.amount! <= 20000000) {
-                let res = calculateSalaryTax(percentageVal: 15, incomeAmount: Double(income.amount!))
+                let res = calculateTaxRate(percentageVal: 15, incomeAmount: Double(income.amount!))
                 cell.taxAmount.text = curFormat.string(from: res as NSNumber)
                 let totaRes = calTotalAmt(tax: res, incomeAmount: Double(income.amount!))
                 cell.totalAmount.text = curFormat.string(from: totaRes as NSNumber)
             } else if (income.amount! >= 20000001 && income.amount! <= 30000000) {
-                let res = calculateSalaryTax(percentageVal: 20, incomeAmount: Double(income.amount!))
+                let res = calculateTaxRate(percentageVal: 20, incomeAmount: Double(income.amount!))
                 cell.taxAmount.text = curFormat.string(from: res as NSNumber)
                 let totaRes = calTotalAmt(tax: res, incomeAmount: Double(income.amount!))
                 cell.totalAmount.text = curFormat.string(from: totaRes as NSNumber)
             } else {
-                let res = calculateSalaryTax(percentageVal: 30, incomeAmount: Double(income.amount!))
+                let res = calculateTaxRate(percentageVal: 30, incomeAmount: Double(income.amount!))
                 cell.taxAmount.text = curFormat.string(from: res as NSNumber)
                 let totaRes = calTotalAmt(tax: res, incomeAmount: Double(income.amount!))
                 cell.totalAmount.text = curFormat.string(from: totaRes as NSNumber)
             }
         } else if (income.category == "Bonus") {
             if (income.date! >= "2023/01/01" && income.date! <= "2023/12/31") {
-                if (income.amount! >= 300000) {
-                    let res = calculateBonusTax(percentageVal: 0.22, incomeAmount: Double(income.amount!))
+                if (income.amount! >= 1000000) {
+                    let res = calculateTaxRate(percentageVal: 22, incomeAmount: Double(income.amount!))
                     cell.taxAmount.text = curFormat.string(from: res as NSNumber)
                     let totaRes = calTotalAmt(tax: res, incomeAmount: Double(income.amount!))
                     cell.totalAmount.text = curFormat.string(from: totaRes as NSNumber)

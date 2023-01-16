@@ -116,8 +116,6 @@ class SettingVC: UIViewController, UIDocumentPickerDelegate {
                 guard let personEntity = NSEntityDescription.entity(forEntityName: "Expenses", in: managedContext) else { return }
                 let expense = NSManagedObject(entity: personEntity, insertInto: managedContext)
 
-
-
                 expense.setValue(stringToArr[0], forKey: "title")
                 expense.setValue(stringToArr[1], forKey: "category")
                 expense.setValue(Int(stringToArr[2]), forKey: "amount")
@@ -126,13 +124,10 @@ class SettingVC: UIViewController, UIDocumentPickerDelegate {
                 expense.setValue(stringToArr[5], forKey: "createdAt")
                 expense.setValue(stringToArr[6], forKey: "updatedAt")
 
-
-
                 do {
                     try managedContext.save()
                     debugPrint("Data Saved")
                     
-            
                     let createResultCsv = ExpenseModel(title:String(stringToArr[0]), category: String(stringToArr[1]), amount: Int(String(stringToArr[2])), date: String(stringToArr[4]), type: Int(String(stringToArr[3])) == 1 ? true : false, createdAt: String(stringToArr[5]), updatedAt: String(stringToArr[6]))
                     print("Result", createResultCsv)
 
@@ -184,13 +179,10 @@ class SettingVC: UIViewController, UIDocumentPickerDelegate {
                 
                 self.expenseArr.append(obj)
             }
-            
-            
         } catch let error as NSError {
             debugPrint(error)
         }
     }
-    
 }
 
 

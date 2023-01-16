@@ -27,7 +27,6 @@ class HomeVC: UIViewController {
     
     @IBOutlet weak var homeView: UIView!
     
-    
     @IBOutlet weak var allBtn: UIButton!
     @IBOutlet weak var incomeBtn: UIButton!
     @IBOutlet weak var expenseBtn: UIButton!
@@ -68,15 +67,11 @@ class HomeVC: UIViewController {
                 self.tableView.reloadData()
             }
         }
-        print("expense Arr", expenseArr)
-        
-        
     }
     
     
     @IBAction func menuButton(_ sender: Any) {
         self.drawerController?.openSide(.left)
-        print("Drawer")
     }
     
     @IBAction func allTapped(_ sender: Any) {
@@ -104,7 +99,6 @@ class HomeVC: UIViewController {
             expenseBtn.backgroundColor = .systemGray
         }
         tableView.reloadData()
-        
     }
     
     @IBAction func expenseTapped(_ sender: Any) {
@@ -122,7 +116,6 @@ class HomeVC: UIViewController {
     }
     
     func createTapped(_ sender: Any) {
-        
         testExp = false
         testIncome = false
         
@@ -134,7 +127,6 @@ class HomeVC: UIViewController {
     }
     
     func goToSetting(_ sender: Any) {
-        
         let ItemList = self.storyboard?.instantiateViewController(withIdentifier: "SettingVC") as! SettingVC
         ItemList.delegate = self
         self.present(ItemList, animated: true, completion: nil)
@@ -162,7 +154,6 @@ class HomeVC: UIViewController {
         csvWriter?.writeField("UpdatedAt")
         csvWriter?.finishLine()
         
-        
         for item in expenseArr.enumerated() {
             print("inner title", item.element.title as Any)
             csvWriter?.writeField(item.element.title as Any)
@@ -176,7 +167,6 @@ class HomeVC: UIViewController {
             csvWriter?.finishLine()
         }
         csvWriter?.closeStream()
-        
         
         let buffer = (output.property(forKey: .dataWrittenToMemoryStreamKey) as? Data)!
         
@@ -231,8 +221,6 @@ class HomeVC: UIViewController {
         }
     }
     
-    
-    
     //    read expense data
     func readExpenseData() {
         guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {return}
@@ -245,10 +233,7 @@ class HomeVC: UIViewController {
             guard let result = try managedContext.fetch(fetchRequest) as? [NSManagedObject] else {
                 return
             }
-            print("Saved values",result)
             for data in result {
-                print("AMOUNT", data.value(forKey: "amount") as? Int ?? "")
-                
                 let obj = ExpenseModel(
                     title: (data.value(forKey: "title") as! String),
                     category: (data.value(forKey: "category") as! String),
@@ -258,11 +243,8 @@ class HomeVC: UIViewController {
                     createdAt: (data.value(forKey: "createdAt") as? String),
                     updatedAt: (data.value(forKey: "updatedAt") as? String)
                 )
-                
                 self.expenseArr.append(obj)
             }
-            
-            
         } catch let error as NSError {
             debugPrint(error)
         }
@@ -286,10 +268,8 @@ class HomeVC: UIViewController {
         
         // For Salary
         let filterIncArr = expenseArr.filter{$0.type == false}.filter{$0.category == "Salary"}
-        print("filterIncArr", filterIncArr)
-        
         let sumfirstTax = filterIncArr.filter{$0.amount! >= 0}.filter{$0.amount! <= 2000000}.map{Int($0.amount!)}.reduce(0, +)
-        
+            
         let secTax = filterIncArr.filter{$0.amount! >= 2000001}.filter{$0.amount! <= 5000000}
         let secTaxArr = secTax.map{Int($0.amount!)}
         let sumSecTax = secTaxArr.reduce(0, +)
@@ -316,37 +296,35 @@ class HomeVC: UIViewController {
         let sumSixthTax = sixthTaxArr.reduce(0, +)
         let finalSumSixthax = calculateTax(percentageVal: Double(25 * sixthTaxArr.count), incomeAmount: Double(sumSixthTax))
         
-                
-//        for bonuse Tax
+        
+        //        for bonuse Tax
         let bonusArr = expenseArr.filter{$0.type == false}.filter{$0.category == "Bonus"}.filter{$0.date! >= "2023/01/01"}.filter{$0.date! <= "2023/12/31"}.map{$0.amount!}.reduce(0, +)
+        print("bonus Arr", bonusArr)
         
-        print("bonusArr", bonusArr)
         var bonusRes: Double = 0
-        if (bonusArr > 300000) {
-            bonusRes = calculateBonusTax(percentageVal: Double(0.22), incomeAmount: Double(bonusArr))
-            print("bonusRes", bonusRes)
+        if (bonusArr >= 1000000) {
+            bonusRes = calculateTax(percentageVal: Double(22), incomeAmount: Double(bonusArr))
         }
+        print("bonusRes", bonusRes)
         
-//      last tax
+        //      last tax
         let lastIncome = expenseArr.filter{$0.type == false}.filter{$0.category != "Salary"}.filter{$0.category != "Bonus"}.map{$0.amount!}.reduce(0, +)
         print("lastIncome", lastIncome)
         
         
-        
-        
-//        final Total Income Result
+        //        final Total Income Result
         let totalIncome = Double(sumfirstTax) + finalSumSecTax + finalSumThirdTax + finalSumFourthTax + finalSumFifthTax + finalSumSixthax + bonusRes + Double(lastIncome)
-        print("total Income", totalIncome)
+        print("total Income", totalIncome, bonusRes)
         incomeLabel.text = "+" + curFormat.string(from: totalIncome as NSNumber)! + "MMK"
         
         
         let balanceRes = totalIncome - Double(expRes)
         balanceLabel.text = curFormat.string(from: balanceRes as NSNumber)! + "MMK"
         balance = Int(balanceRes)
-
+            
+        }
     }
-}
-
+    
     // calculate salary tax
     func calculateTax(percentageVal:Double, incomeAmount:Double)->Double {
         let per = percentageVal / 100.0
@@ -355,29 +333,30 @@ class HomeVC: UIViewController {
         print("inner final Res", finalRes)
         return finalRes
     }
-
-// calculate bonus tax
+    
+    // calculate bonus tax
     func calculateBonusTax(percentageVal: Double, incomeAmount: Double)->Double {
-        let res = percentageVal * incomeAmount
+        let per = percentageVal / 100.0
+        let res = per * incomeAmount
         let finalBonusRes = incomeAmount - res
         return finalBonusRes
     }
     
-//    get color
+    //    get color
     func getUIColor(hex: String, alpha: Double = 1.0) -> UIColor? {
         var cleanString = hex.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
-
+        
         if (cleanString.hasPrefix("#")) {
             cleanString.remove(at: cleanString.startIndex)
         }
-
+        
         if ((cleanString.count) != 6) {
             return nil
         }
-
+        
         var rgbValue: UInt32 = 0
         Scanner(string: cleanString).scanHexInt32(&rgbValue)
-
+        
         return UIColor(
             red: CGFloat((rgbValue & 0xFF0000) >> 16) / 255.0,
             green: CGFloat((rgbValue & 0x00FF00) >> 8) / 255.0,
@@ -385,7 +364,6 @@ class HomeVC: UIViewController {
             alpha: CGFloat(1.0)
         )
     }
-
 
 
 
@@ -416,10 +394,10 @@ extension HomeVC: UITableViewDataSource, UITableViewDelegate {
         print("tablecount",filterIncomeArr.count,filterExpenseArr.count,expenseArr.count)
         
         if testIncome == true {
-            let expense = filterIncomeArr[indexPath.row]
-            print("index income", expense)
-            cell.title.text = expense.title
-            cell.category.text = expense.category
+            let income = filterIncomeArr[indexPath.row]
+            print("index income", income)
+            cell.title.text = income.title
+            cell.category.text = income.category
             
             let curFormat = NumberFormatter()
             curFormat.usesGroupingSeparator = true
@@ -428,30 +406,42 @@ extension HomeVC: UITableViewDataSource, UITableViewDelegate {
             curFormat.decimalSeparator = "."
             curFormat.numberStyle = .decimal
             
-            if (expense.amount! >= 0 && expense.amount! <= 2000000) {
-                cell.amount.text = curFormat.string(from: expense.amount! as NSNumber)
-            } else if (expense.amount! >= 2000001 && expense.amount! <= 5000000) {
-                print("tax5")
-                let res = calculateTax(percentageVal: 5, incomeAmount: Double(expense.amount!))
-                cell.amount.text = curFormat.string(from: res as NSNumber)
-            } else if (expense.amount! >= 5000001 && expense.amount! <= 10000000) {
-                let res = calculateTax(percentageVal: 10, incomeAmount: Double(expense.amount!))
-                cell.amount.text = curFormat.string(from: res as NSNumber)
-            } else if (expense.amount! >= 10000001 && expense.amount! <= 20000000) {
-                let res = calculateTax(percentageVal: 15, incomeAmount: Double(expense.amount!))
-                cell.amount.text = curFormat.string(from: res as NSNumber)
-            } else if (expense.amount! >= 20000001 && expense.amount! <= 30000000) {
-                print("tax20")
-                let res = calculateTax(percentageVal: 20, incomeAmount: Double(expense.amount!))
-                cell.amount.text = curFormat.string(from: res as NSNumber)
+//            for salary
+            if (income.category == "Salary") {
+                if (income.amount! >= 0 && income.amount! <= 2000000) {
+                    cell.amount.text = curFormat.string(from: income.amount! as NSNumber)
+                } else if (income.amount! >= 2000001 && income.amount! <= 5000000) {
+                    print("tax5")
+                    let res = calculateTax(percentageVal: 5, incomeAmount: Double(income.amount!))
+                    cell.amount.text = curFormat.string(from: res as NSNumber)
+                } else if (income.amount! >= 5000001 && income.amount! <= 10000000) {
+                    let res = calculateTax(percentageVal: 10, incomeAmount: Double(income.amount!))
+                    cell.amount.text = curFormat.string(from: res as NSNumber)
+                } else if (income.amount! >= 10000001 && income.amount! <= 20000000) {
+                    let res = calculateTax(percentageVal: 15, incomeAmount: Double(income.amount!))
+                    cell.amount.text = curFormat.string(from: res as NSNumber)
+                } else if (income.amount! >= 20000001 && income.amount! <= 30000000) {
+                    print("tax20")
+                    let res = calculateTax(percentageVal: 20, incomeAmount: Double(income.amount!))
+                    cell.amount.text = curFormat.string(from: res as NSNumber)
+                } else {
+                    let res = calculateTax(percentageVal: 25, incomeAmount: Double(income.amount!))
+                    cell.amount.text = curFormat.string(from: res as NSNumber)
+                }
+            } else if (income.category == "Bonus") {
+                if (income.amount! >= 1000000) {
+                    let res = calculateTax(percentageVal: 22, incomeAmount: Double(income.amount!))
+                    cell.amount.text = curFormat.string(from: res as NSNumber)
+                } else {
+                    cell.amount.text = curFormat.string(from: income.amount! as NSNumber)
+                }
             } else {
-                let res = calculateTax(percentageVal: 25, incomeAmount: Double(expense.amount!))
-                cell.amount.text = curFormat.string(from: res as NSNumber)
+                cell.amount.text = curFormat.string(from: income.amount! as NSNumber)
             }
             
             
-            cell.date.text = expense.date
-            cell.type.text = String(expense.type!) == "true" ? "Expense" : "Income"
+            cell.date.text = income.date
+            cell.type.text = String(income.type!) == "true" ? "Expense" : "Income"
 
             if (cell.type.text == "Expense") {
                 cell.itemView.backgroundColor = getUIColor(hex: "#ee6c4d")
@@ -464,9 +454,6 @@ extension HomeVC: UITableViewDataSource, UITableViewDelegate {
             let expense = filterExpenseArr[indexPath.row]
             print("index expense", expense)
             
-            cell.title.text = expense.title
-            cell.category.text = expense.category
-            
             let curFormat = NumberFormatter()
             curFormat.usesGroupingSeparator = true
             curFormat.locale = Locale.current
@@ -474,28 +461,9 @@ extension HomeVC: UITableViewDataSource, UITableViewDelegate {
             curFormat.decimalSeparator = "."
             curFormat.numberStyle = .decimal
             
-            if (expense.amount! >= 0 && expense.amount! <= 2000000) {
-                cell.amount.text = curFormat.string(from: expense.amount! as NSNumber)
-            } else if (expense.amount! >= 2000001 && expense.amount! <= 5000000) {
-                print("tax5")
-                let res = calculateTax(percentageVal: 5, incomeAmount: Double(expense.amount!))
-                cell.amount.text = curFormat.string(from: res as NSNumber)
-            } else if (expense.amount! >= 5000001 && expense.amount! <= 10000000) {
-                let res = calculateTax(percentageVal: 10, incomeAmount: Double(expense.amount!))
-                cell.amount.text = curFormat.string(from: res as NSNumber)
-            } else if (expense.amount! >= 10000001 && expense.amount! <= 20000000) {
-                let res = calculateTax(percentageVal: 15, incomeAmount: Double(expense.amount!))
-                cell.amount.text = curFormat.string(from: res as NSNumber)
-            } else if (expense.amount! >= 20000001 && expense.amount! <= 30000000) {
-                print("tax20")
-                let res = calculateTax(percentageVal: 20, incomeAmount: Double(expense.amount!))
-                cell.amount.text = curFormat.string(from: res as NSNumber)
-            } else {
-                let res = calculateTax(percentageVal: 25, incomeAmount: Double(expense.amount!))
-                cell.amount.text = curFormat.string(from: res as NSNumber)
-            }
-            
-            
+            cell.title.text = expense.title
+            cell.category.text = expense.category
+            cell.amount.text = curFormat.string(from: expense.amount! as NSNumber)
             cell.date.text = expense.date
             cell.type.text = String(expense.type!) == "true" ? "Expense" : "Income"
 
@@ -519,27 +487,38 @@ extension HomeVC: UITableViewDataSource, UITableViewDelegate {
             curFormat.decimalSeparator = "."
             curFormat.numberStyle = .decimal
             
-            if (expense.amount! >= 0 && expense.amount! <= 2000000) {
-                cell.amount.text = curFormat.string(from: expense.amount! as NSNumber)
-            } else if (expense.amount! >= 2000001 && expense.amount! <= 5000000) {
-                print("tax5")
-                let res = calculateTax(percentageVal: 5, incomeAmount: Double(expense.amount!))
-                cell.amount.text = curFormat.string(from: res as NSNumber)
-            } else if (expense.amount! >= 5000001 && expense.amount! <= 10000000) {
-                let res = calculateTax(percentageVal: 10, incomeAmount: Double(expense.amount!))
-                cell.amount.text = curFormat.string(from: res as NSNumber)
-            } else if (expense.amount! >= 10000001 && expense.amount! <= 20000000) {
-                let res = calculateTax(percentageVal: 15, incomeAmount: Double(expense.amount!))
-                cell.amount.text = curFormat.string(from: res as NSNumber)
-            } else if (expense.amount! >= 20000001 && expense.amount! <= 30000000) {
-                print("tax20")
-                let res = calculateTax(percentageVal: 20, incomeAmount: Double(expense.amount!))
-                cell.amount.text = curFormat.string(from: res as NSNumber)
-            } else {
-                let res = calculateTax(percentageVal: 25, incomeAmount: Double(expense.amount!))
-                cell.amount.text = curFormat.string(from: res as NSNumber)
-            }
-            
+//            For Salary
+             if (expense.category == "Salary") {
+                 if (expense.amount! >= 0 && expense.amount! <= 2000000) {
+                     cell.amount.text = curFormat.string(from: expense.amount! as NSNumber)
+                 } else if (expense.amount! >= 2000001 && expense.amount! <= 5000000) {
+                     print("tax5")
+                     let res = calculateTax(percentageVal: 5, incomeAmount: Double(expense.amount!))
+                     cell.amount.text = curFormat.string(from: res as NSNumber)
+                 } else if (expense.amount! >= 5000001 && expense.amount! <= 10000000) {
+                     let res = calculateTax(percentageVal: 10, incomeAmount: Double(expense.amount!))
+                     cell.amount.text = curFormat.string(from: res as NSNumber)
+                 } else if (expense.amount! >= 10000001 && expense.amount! <= 20000000) {
+                     let res = calculateTax(percentageVal: 15, incomeAmount: Double(expense.amount!))
+                     cell.amount.text = curFormat.string(from: res as NSNumber)
+                 } else if (expense.amount! >= 20000001 && expense.amount! <= 30000000) {
+                     print("tax20")
+                     let res = calculateTax(percentageVal: 20, incomeAmount: Double(expense.amount!))
+                     cell.amount.text = curFormat.string(from: res as NSNumber)
+                 } else {
+                     let res = calculateTax(percentageVal: 25, incomeAmount: Double(expense.amount!))
+                     cell.amount.text = curFormat.string(from: res as NSNumber)
+                 }
+             } else if (expense.category == "Bonus") {
+                 if (expense.amount! >= 1000000) {
+                     let res = calculateTax(percentageVal: 22, incomeAmount: Double(expense.amount!))
+                     cell.amount.text = curFormat.string(from: res as NSNumber)
+                 } else {
+                     cell.amount.text = curFormat.string(from: expense.amount! as NSNumber)
+                 }
+             } else {
+                 cell.amount.text = curFormat.string(from: expense.amount! as NSNumber)
+             }
             
             cell.date.text = expense.date
             cell.type.text = String(expense.type!) == "true" ? "Expense" : "Income"
@@ -607,33 +586,45 @@ extension HomeVC: UITableViewDataSource, UITableViewDelegate {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier,for: indexPath) as! ExpenseTableViewCell
         
         if (testIncome == true) {
-            let expense = filterIncomeArr[indexPath.row]
-            cell.title.text = expense.title
-            cell.category.text = expense.category
+            let income = filterIncomeArr[indexPath.row]
+            cell.title.text = income.title
+            cell.category.text = income.category
             
-            if (expense.amount! >= 0 && expense.amount! <= 2000000) {
-                cell.amount.text = String(expense.amount!)
-            } else if (expense.amount! >= 2000001 && expense.amount! <= 5000000) {
-                print("tax5")
-                 let res = calculateTax(percentageVal: 5, incomeAmount: Double(expense.amount!))
-                 cell.amount.text = String(res)
-            } else if (expense.amount! >= 5000001 && expense.amount! <= 10000000) {
-                let res = calculateTax(percentageVal: 10, incomeAmount: Double(expense.amount!))
-                cell.amount.text = String(res)
-            } else if (expense.amount! >= 10000001 && expense.amount! <= 20000000) {
-                let res = calculateTax(percentageVal: 15, incomeAmount: Double(expense.amount!))
-                cell.amount.text = String(res)
-            } else if (expense.amount! >= 20000001 && expense.amount! <= 30000000) {
-                print("tax20")
-                let res = calculateTax(percentageVal: 20, incomeAmount: Double(expense.amount!))
-                cell.amount.text = String(res)
+            if (income.category == "Salary") {
+                if (income.amount! >= 0 && income.amount! <= 2000000) {
+                    cell.amount.text = String(income.amount!)
+                } else if (income.amount! >= 2000001 && income.amount! <= 5000000) {
+                    print("tax5")
+                     let res = calculateTax(percentageVal: 5, incomeAmount: Double(income.amount!))
+                     cell.amount.text = String(res)
+                } else if (income.amount! >= 5000001 && income.amount! <= 10000000) {
+                    let res = calculateTax(percentageVal: 10, incomeAmount: Double(income.amount!))
+                    cell.amount.text = String(res)
+                } else if (income.amount! >= 10000001 && income.amount! <= 20000000) {
+                    let res = calculateTax(percentageVal: 15, incomeAmount: Double(income.amount!))
+                    cell.amount.text = String(res)
+                } else if (income.amount! >= 20000001 && income.amount! <= 30000000) {
+                    print("tax20")
+                    let res = calculateTax(percentageVal: 20, incomeAmount: Double(income.amount!))
+                    cell.amount.text = String(res)
+                } else {
+                    let res = calculateTax(percentageVal: 25, incomeAmount: Double(income.amount!))
+                    cell.amount.text = String(res)
+                }
+            } else if (income.category == "Bonus") {
+                if (income.amount! >= 1000000) {
+                    let res = calculateTax(percentageVal: 22, incomeAmount: Double(income.amount!))
+                    cell.amount.text = String(res)
+                } else {
+                    cell.amount.text = String(income.amount!)
+                }
             } else {
-                let res = calculateTax(percentageVal: 25, incomeAmount: Double(expense.amount!))
-                cell.amount.text = String(res)
+                cell.amount.text = String(income.amount!)
             }
+           
             
-            cell.date.text = expense.date
-            cell.type.text = String(expense.type!) == "true" ? "Expense" : "Income"
+            cell.date.text = income.date
+            cell.type.text = String(income.type!) == "true" ? "Expense" : "Income"
             
             tableView.deselectRow(at: indexPath, animated: true)
             let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "updateExpense") as! UpdateExpenseVC
@@ -652,28 +643,7 @@ extension HomeVC: UITableViewDataSource, UITableViewDelegate {
             print("expenseDetail", expense)
             cell.title.text = expense.title
             cell.category.text = expense.category
-
-            if (expense.amount! >= 0 && expense.amount! <= 2000000) {
-                cell.amount.text = String(expense.amount!)
-            } else if (expense.amount! >= 2000001 && expense.amount! <= 5000000) {
-                print("tax5")
-                 let res = calculateTax(percentageVal: 5, incomeAmount: Double(expense.amount!))
-                 cell.amount.text = String(res)
-            } else if (expense.amount! >= 5000001 && expense.amount! <= 10000000) {
-                let res = calculateTax(percentageVal: 10, incomeAmount: Double(expense.amount!))
-                cell.amount.text = String(res)
-            } else if (expense.amount! >= 10000001 && expense.amount! <= 20000000) {
-                let res = calculateTax(percentageVal: 15, incomeAmount: Double(expense.amount!))
-                cell.amount.text = String(res)
-            } else if (expense.amount! >= 20000001 && expense.amount! <= 30000000) {
-                print("tax20")
-                let res = calculateTax(percentageVal: 20, incomeAmount: Double(expense.amount!))
-                cell.amount.text = String(res)
-            } else {
-                let res = calculateTax(percentageVal: 25, incomeAmount: Double(expense.amount!))
-                cell.amount.text = String(res)
-            }
-            
+            cell.amount.text = String(expense.amount!)
             cell.date.text = expense.date
             cell.type.text = String(expense.type!) == "true" ? "Expense" : "Income"
             
@@ -694,27 +664,41 @@ extension HomeVC: UITableViewDataSource, UITableViewDelegate {
             print("expenseDetail", expense)
             cell.title.text = expense.title
             cell.category.text = expense.category
-
-            if (expense.amount! >= 0 && expense.amount! <= 2000000) {
-                cell.amount.text = String(expense.amount!)
-            } else if (expense.amount! >= 2000001 && expense.amount! <= 5000000) {
-                print("tax5")
-                 let res = calculateTax(percentageVal: 5, incomeAmount: Double(expense.amount!))
-                 cell.amount.text = String(res)
-            } else if (expense.amount! >= 5000001 && expense.amount! <= 10000000) {
-                let res = calculateTax(percentageVal: 10, incomeAmount: Double(expense.amount!))
-                cell.amount.text = String(res)
-            } else if (expense.amount! >= 10000001 && expense.amount! <= 20000000) {
-                let res = calculateTax(percentageVal: 15, incomeAmount: Double(expense.amount!))
-                cell.amount.text = String(res)
-            } else if (expense.amount! >= 20000001 && expense.amount! <= 30000000) {
-                print("tax20")
-                let res = calculateTax(percentageVal: 20, incomeAmount: Double(expense.amount!))
-                cell.amount.text = String(res)
+            
+            // for salary
+            if (expense.category == "Salary") {
+                if (expense.amount! >= 0 && expense.amount! <= 2000000) {
+                    cell.amount.text = String(expense.amount!)
+                } else if (expense.amount! >= 2000001 && expense.amount! <= 5000000) {
+                    print("tax5")
+                     let res = calculateTax(percentageVal: 5, incomeAmount: Double(expense.amount!))
+                     cell.amount.text = String(res)
+                } else if (expense.amount! >= 5000001 && expense.amount! <= 10000000) {
+                    let res = calculateTax(percentageVal: 10, incomeAmount: Double(expense.amount!))
+                    cell.amount.text = String(res)
+                } else if (expense.amount! >= 10000001 && expense.amount! <= 20000000) {
+                    let res = calculateTax(percentageVal: 15, incomeAmount: Double(expense.amount!))
+                    cell.amount.text = String(res)
+                } else if (expense.amount! >= 20000001 && expense.amount! <= 30000000) {
+                    print("tax20")
+                    let res = calculateTax(percentageVal: 20, incomeAmount: Double(expense.amount!))
+                    cell.amount.text = String(res)
+                } else {
+                    let res = calculateTax(percentageVal: 25, incomeAmount: Double(expense.amount!))
+                    cell.amount.text = String(res)
+                }
+            } else if (expense.category == "Bonus") {
+                if (expense.amount! >= 1000000) {
+                    let res = calculateTax(percentageVal: 22, incomeAmount: Double(expense.amount!))
+                    cell.amount.text = String(res)
+                } else {
+                    cell.amount.text = String(expense.amount!)
+                }
             } else {
-                let res = calculateTax(percentageVal: 25, incomeAmount: Double(expense.amount!))
-                cell.amount.text = String(res)
+                cell.amount.text = String(expense.amount!)
             }
+
+            
             
             cell.date.text = expense.date
             cell.type.text = String(expense.type!) == "true" ? "Expense" : "Income"

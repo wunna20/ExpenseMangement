@@ -18,7 +18,6 @@ protocol Send{
 
 class UpdateExpenseVC: UIViewController, UITextFieldDelegate {
 
-    
     var delegate: Send?
 
     @IBOutlet weak var titleTF: UITextField!
@@ -101,7 +100,6 @@ class UpdateExpenseVC: UIViewController, UITextFieldDelegate {
             dropDown.dataSource = catExpenseArr
         }
 
-        
         hideKeyboardWhenTappedAround()
        
     }
@@ -188,10 +186,6 @@ class UpdateExpenseVC: UIViewController, UITextFieldDelegate {
             }
                 
     }
-        
-
-    
-    
     
     @IBAction func backTapped(_ sender: Any) {
         if let nav = self.navigationController {
