@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="DrawerTableViewCell" id="KGk-i7-Jjw" customClass="DrawerTableViewCell" customModule="Expense_Mangement" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Itm-UM-BgS">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="square.and.arrow.up" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="kch-jJ-8Ae">
+                                <rect key="frame" x="10" y="14" width="50" height="14.666666666666664"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="50" id="dby-iL-1m0"/>
+                                </constraints>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="c1F-dC-9zd">
+                                <rect key="frame" x="80" y="11.666666666666666" width="160" height="20.666666666666671"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="c1F-dC-9zd" secondAttribute="trailing" constant="80" id="1V8-UX-yv9"/>
+                            <constraint firstItem="c1F-dC-9zd" firstAttribute="centerY" secondItem="Itm-UM-BgS" secondAttribute="centerY" id="4bs-bd-uB9"/>
+                            <constraint firstItem="c1F-dC-9zd" firstAttribute="top" secondItem="Itm-UM-BgS" secondAttribute="top" constant="11.666666666666664" id="Dvx-Df-79u"/>
+                            <constraint firstItem="c1F-dC-9zd" firstAttribute="leading" secondItem="kch-jJ-8Ae" secondAttribute="trailing" constant="20" id="H6K-Pm-D3M"/>
+                            <constraint firstItem="kch-jJ-8Ae" firstAttribute="centerY" secondItem="c1F-dC-9zd" secondAttribute="centerY" id="NQE-kZ-Giv"/>
+                            <constraint firstAttribute="bottom" secondItem="kch-jJ-8Ae" secondAttribute="bottom" constant="15" id="hOQ-KE-EFQ"/>
+                            <constraint firstItem="kch-jJ-8Ae" firstAttribute="top" secondItem="Itm-UM-BgS" secondAttribute="top" constant="15" id="l4o-en-lXf"/>
+                            <constraint firstItem="c1F-dC-9zd" firstAttribute="leading" secondItem="Itm-UM-BgS" secondAttribute="leading" constant="80" id="nOR-8R-fkZ"/>
+                            <constraint firstItem="kch-jJ-8Ae" firstAttribute="centerY" secondItem="Itm-UM-BgS" secondAttribute="centerY" id="uel-dI-PeV"/>
+                        </constraints>
+                    </view>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="Itm-UM-BgS" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="SoP-eH-j41"/>
+                    <constraint firstItem="Itm-UM-BgS" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="VRk-IM-cLB"/>
+                    <constraint firstAttribute="bottom" secondItem="Itm-UM-BgS" secondAttribute="bottom" id="okI-YN-f7e"/>
+                    <constraint firstAttribute="trailing" secondItem="Itm-UM-BgS" secondAttribute="trailing" id="oyC-Sb-gDy"/>
+                </constraints>
+            </tableViewCellContentView>
+            <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
+            <connections>
+                <outlet property="navImage" destination="kch-jJ-8Ae" id="PwD-64-VYz"/>
+                <outlet property="title" destination="c1F-dC-9zd" id="Cqa-hM-Wva"/>
+            </connections>
+            <point key="canvasLocation" x="112.97709923664122" y="-11.267605633802818"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <image name="square.and.arrow.up" catalog="system" width="115" height="128"/>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

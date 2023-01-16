@@ -1,0 +1,6 @@
+framework module KWDrawerController {
+  umbrella header "KWDrawerController-umbrella.h"
+
+  export *
+  module * { export * }
+}
