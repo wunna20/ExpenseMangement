@@ -180,55 +180,54 @@ extension PersonalIncomeTaxListVC: UITableViewDataSource, UITableViewDelegate {
         cell.title.text = income.title
         cell.category.text = income.category
         cell.date.text = income.date
-        cell.incomeAmount.text = curFormat.string(from: income.amount! as NSNumber)
-        
+        cell.incomeAmount.text = curFormat.string(from: income.amount! as NSNumber)! + " MMK"
         
         
         if (income.category == "Salary") {
             if (income.amount! >= 0 && income.amount! <= 2000000) {
-                cell.taxAmount.text = "0"
-                cell.totalAmount.text = curFormat.string(from: income.amount! as NSNumber)
+                cell.taxAmount.text = "0 MMK"
+                cell.totalAmount.text = curFormat.string(from: income.amount! as NSNumber)! + " MMK"
             } else if (income.amount! >= 2000001 && income.amount! <= 5000000) {
                 let res = calculateTaxRate(percentageVal: 5, incomeAmount: Double(income.amount!))
-                cell.taxAmount.text = curFormat.string(from: res as NSNumber)
+                cell.taxAmount.text = curFormat.string(from: res as NSNumber)! + " MMK"
                 let totaRes = calTotalAmt(tax: res, incomeAmount: Double(income.amount!))
-                cell.totalAmount.text = curFormat.string(from: totaRes as NSNumber)
+                cell.totalAmount.text = curFormat.string(from: totaRes as NSNumber)! + " MMK"
             } else if (income.amount! >= 5000001 && income.amount! <= 10000000) {
                 let res = calculateTaxRate(percentageVal: 10, incomeAmount: Double(income.amount!))
-                cell.taxAmount.text = curFormat.string(from: res as NSNumber)
+                cell.taxAmount.text = curFormat.string(from: res as NSNumber)! + " MMK"
                 let totaRes = calTotalAmt(tax: res, incomeAmount: Double(income.amount!))
                 cell.totalAmount.text = curFormat.string(from: totaRes as NSNumber)
             } else if (income.amount! >= 10000001 && income.amount! <= 20000000) {
                 let res = calculateTaxRate(percentageVal: 15, incomeAmount: Double(income.amount!))
-                cell.taxAmount.text = curFormat.string(from: res as NSNumber)
+                cell.taxAmount.text = curFormat.string(from: res as NSNumber)! + " MMK"
                 let totaRes = calTotalAmt(tax: res, incomeAmount: Double(income.amount!))
-                cell.totalAmount.text = curFormat.string(from: totaRes as NSNumber)
+                cell.totalAmount.text = curFormat.string(from: totaRes as NSNumber)! + " MMK"
             } else if (income.amount! >= 20000001 && income.amount! <= 30000000) {
                 let res = calculateTaxRate(percentageVal: 20, incomeAmount: Double(income.amount!))
-                cell.taxAmount.text = curFormat.string(from: res as NSNumber)
+                cell.taxAmount.text = curFormat.string(from: res as NSNumber)! + " MMK"
                 let totaRes = calTotalAmt(tax: res, incomeAmount: Double(income.amount!))
-                cell.totalAmount.text = curFormat.string(from: totaRes as NSNumber)
+                cell.totalAmount.text = curFormat.string(from: totaRes as NSNumber)! + " MMK"
             } else {
                 let res = calculateTaxRate(percentageVal: 30, incomeAmount: Double(income.amount!))
-                cell.taxAmount.text = curFormat.string(from: res as NSNumber)
+                cell.taxAmount.text = curFormat.string(from: res as NSNumber)! + " MMK"
                 let totaRes = calTotalAmt(tax: res, incomeAmount: Double(income.amount!))
-                cell.totalAmount.text = curFormat.string(from: totaRes as NSNumber)
+                cell.totalAmount.text = curFormat.string(from: totaRes as NSNumber)! + " MMK"
             }
         } else if (income.category == "Bonus") {
             if (income.date! >= "2023/01/01" && income.date! <= "2023/12/31") {
                 if (income.amount! >= 1000000) {
                     let res = calculateTaxRate(percentageVal: 22, incomeAmount: Double(income.amount!))
-                    cell.taxAmount.text = curFormat.string(from: res as NSNumber)
+                    cell.taxAmount.text = curFormat.string(from: res as NSNumber)! + " MMK"
                     let totaRes = calTotalAmt(tax: res, incomeAmount: Double(income.amount!))
-                    cell.totalAmount.text = curFormat.string(from: totaRes as NSNumber)
+                    cell.totalAmount.text = curFormat.string(from: totaRes as NSNumber)! + " MMK"
                 } else {
-                    cell.taxAmount.text = "0"
-                    cell.totalAmount.text = curFormat.string(from: income.amount! as NSNumber)
+                    cell.taxAmount.text = "0 MMK"
+                    cell.totalAmount.text = curFormat.string(from: income.amount! as NSNumber)! + " MMK"
                 }
             }
         } else {
-            cell.taxAmount.text = "0"
-            cell.totalAmount.text = curFormat.string(from: income.amount! as NSNumber)
+            cell.taxAmount.text = "0 MMK"
+            cell.totalAmount.text = curFormat.string(from: income.amount! as NSNumber)! + " MMK"
         }
         
         return cell

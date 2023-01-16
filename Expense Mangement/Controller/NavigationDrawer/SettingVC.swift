@@ -52,7 +52,6 @@ class SettingVC: UIViewController, UIDocumentPickerDelegate {
     }
     
     @IBAction func selectFileTapped(_ sender: Any) {
-        print("hello")
         let supportedFiles : [UTType] = [UTType.data]
         let controller = UIDocumentPickerViewController(forOpeningContentTypes: supportedFiles, asCopy: true)
         controller.delegate = self

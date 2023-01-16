@@ -334,14 +334,6 @@ class HomeVC: UIViewController {
         return finalRes
     }
     
-    // calculate bonus tax
-    func calculateBonusTax(percentageVal: Double, incomeAmount: Double)->Double {
-        let per = percentageVal / 100.0
-        let res = per * incomeAmount
-        let finalBonusRes = incomeAmount - res
-        return finalBonusRes
-    }
-    
     //    get color
     func getUIColor(hex: String, alpha: Double = 1.0) -> UIColor? {
         var cleanString = hex.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
@@ -488,27 +480,27 @@ extension HomeVC: UITableViewDataSource, UITableViewDelegate {
             curFormat.numberStyle = .decimal
             
 //            For Salary
-             if (expense.category == "Salary") {
-                 if (expense.amount! >= 0 && expense.amount! <= 2000000) {
-                     cell.amount.text = curFormat.string(from: expense.amount! as NSNumber)
-                 } else if (expense.amount! >= 2000001 && expense.amount! <= 5000000) {
-                     print("tax5")
-                     let res = calculateTax(percentageVal: 5, incomeAmount: Double(expense.amount!))
-                     cell.amount.text = curFormat.string(from: res as NSNumber)
-                 } else if (expense.amount! >= 5000001 && expense.amount! <= 10000000) {
+            if (expense.category == "Salary") {
+                if (expense.amount! >= 0 && expense.amount! <= 2000000) {
+                    cell.amount.text = curFormat.string(from: expense.amount! as NSNumber)
+                } else if (expense.amount! >= 2000001 && expense.amount! <= 5000000) {
+                    print("tax5")
+                    let res = calculateTax(percentageVal: 5, incomeAmount: Double(expense.amount!))
+                    cell.amount.text = curFormat.string(from: res as NSNumber)
+                } else if (expense.amount! >= 5000001 && expense.amount! <= 10000000) {
                      let res = calculateTax(percentageVal: 10, incomeAmount: Double(expense.amount!))
                      cell.amount.text = curFormat.string(from: res as NSNumber)
-                 } else if (expense.amount! >= 10000001 && expense.amount! <= 20000000) {
+                } else if (expense.amount! >= 10000001 && expense.amount! <= 20000000) {
                      let res = calculateTax(percentageVal: 15, incomeAmount: Double(expense.amount!))
                      cell.amount.text = curFormat.string(from: res as NSNumber)
-                 } else if (expense.amount! >= 20000001 && expense.amount! <= 30000000) {
+                } else if (expense.amount! >= 20000001 && expense.amount! <= 30000000) {
                      print("tax20")
                      let res = calculateTax(percentageVal: 20, incomeAmount: Double(expense.amount!))
                      cell.amount.text = curFormat.string(from: res as NSNumber)
-                 } else {
+                } else {
                      let res = calculateTax(percentageVal: 25, incomeAmount: Double(expense.amount!))
                      cell.amount.text = curFormat.string(from: res as NSNumber)
-                 }
+                }
              } else if (expense.category == "Bonus") {
                  if (expense.amount! >= 1000000) {
                      let res = calculateTax(percentageVal: 22, incomeAmount: Double(expense.amount!))
@@ -718,8 +710,6 @@ extension HomeVC: UITableViewDataSource, UITableViewDelegate {
         }
         
     }
-        
-    
 }
 
 
@@ -729,6 +719,8 @@ extension HomeVC: Send {
         self.dismiss(animated: true) { [self] in
             self.expenseArr[index] = expense
             calculate()
+            testIncome = false
+            testExp = false
             self.tableView.reloadData()
         }
     }
