@@ -91,6 +91,8 @@ class HomeVC: UIViewController {
         testExp = false
         testIncome = true
         filterIncomeArr = expenseArr.filter{$0.type == false}
+        filterExpenseArr = expenseArr.filter{$0.type == true}
+
         
         if (incomeBtn.isTouchInside == true) {
             incomeBtn.backgroundColor = getUIColor(hex: "#3D5A80")
@@ -105,6 +107,8 @@ class HomeVC: UIViewController {
         testExp = true
         testIncome = false
         filterExpenseArr = expenseArr.filter{$0.type == true}
+        filterIncomeArr = expenseArr.filter{$0.type == false}
+        print("tap exp", filterExpenseArr)
         
         if (expenseBtn.isTouchInside == true) {
             expenseBtn.backgroundColor = getUIColor(hex: "#3D5A80")
@@ -367,10 +371,10 @@ extension HomeVC: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if (incomeBtn.isTouchInside == true) {
+        if (testIncome == true) {
             print("income count", filterIncomeArr.count)
             return filterIncomeArr.count
-        } else if (expenseBtn.isTouchInside == true) {
+        } else if (testExp == true) {
             print("expense count", filterExpenseArr.count)
             return filterExpenseArr.count
         } else {
@@ -443,6 +447,7 @@ extension HomeVC: UITableViewDataSource, UITableViewDelegate {
             
             return cell
         } else if (testExp == true) {
+            print("inner Exp", filterExpenseArr, indexPath)
             let expense = filterExpenseArr[indexPath.row]
             print("index expense", expense)
             
@@ -627,12 +632,14 @@ extension HomeVC: UITableViewDataSource, UITableViewDelegate {
             vc.category = cell.category.text!
             vc.dateRes = cell.date.text!
             vc.type = cell.type.text!
+            vc.check = "income"
             vc.delegate = self
-            
+
             present(vc, animated: true)
         } else if (testExp == true) {
             let expense = filterExpenseArr[indexPath.row]
             print("expenseDetail", expense)
+            print("hello", indexPath)
             cell.title.text = expense.title
             cell.category.text = expense.category
             cell.amount.text = String(expense.amount!)
@@ -648,8 +655,9 @@ extension HomeVC: UITableViewDataSource, UITableViewDelegate {
             vc.category = cell.category.text!
             vc.dateRes = cell.date.text!
             vc.type = cell.type.text!
+            vc.check = "expense"
             vc.delegate = self
-            
+
             present(vc, animated: true)
         } else {
             let expense = expenseArr[indexPath.row]
@@ -691,7 +699,7 @@ extension HomeVC: UITableViewDataSource, UITableViewDelegate {
             }
 
             
-            
+    
             cell.date.text = expense.date
             cell.type.text = String(expense.type!) == "true" ? "Expense" : "Income"
             
@@ -704,8 +712,9 @@ extension HomeVC: UITableViewDataSource, UITableViewDelegate {
             vc.category = cell.category.text!
             vc.dateRes = cell.date.text!
             vc.type = cell.type.text!
+            vc.check = "all"
             vc.delegate = self
-            
+
             present(vc, animated: true)
         }
         
@@ -714,14 +723,24 @@ extension HomeVC: UITableViewDataSource, UITableViewDelegate {
 
 
 extension HomeVC: Send {
-    func updateData(expense: ExpenseModel, index: Int) {
-        print("inner Expense", expense, index)
+    func updateData(expense: ExpenseModel, index: Int, checkValue: String) {
+        print("inner Expense", expense, index, checkValue)
         self.dismiss(animated: true) { [self] in
-            self.expenseArr[index] = expense
-            calculate()
-            testIncome = false
-            testExp = false
-            self.tableView.reloadData()
+            if (checkValue == "income") {
+                self.filterIncomeArr[index] = expense
+                calculate()
+                self.tableView.reloadData()
+            } else if (checkValue == "expense") {
+                self.filterExpenseArr[index] = expense
+                calculate()
+                self.tableView.reloadData()
+            } else {
+                self.expenseArr[index] = expense
+                calculate()
+                testIncome = false
+                testExp = false
+                self.tableView.reloadData()
+            }
         }
     }
 }
@@ -730,9 +749,20 @@ extension HomeVC: SendCreateData {
     func createData(expense: ExpenseModel) {
         print("inner create Expense", expense)
         self.dismiss(animated: true) { [self] in
-            self.expenseArr.append(expense)
-            calculate()
-            self.tableView.reloadData()
+            if (testExp == true) {
+                self.filterExpenseArr.append(expense)
+                calculate()
+                self.tableView.reloadData()
+            } else if (testIncome == true) {
+                self.filterIncomeArr.append(expense)
+                calculate()
+                self.tableView.reloadData()
+            } else {
+                self.expenseArr.append(expense)
+                calculate()
+                self.tableView.reloadData()
+            }
+            
         }
     }
 }

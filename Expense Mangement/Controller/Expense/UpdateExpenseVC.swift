@@ -11,7 +11,7 @@ import DropDown
 
 protocol Send{
     // index => call expense id
-    func updateData(expense: ExpenseModel, index: Int)
+    func updateData(expense: ExpenseModel, index: Int, checkValue: String)
 }
 
 
@@ -41,12 +41,15 @@ class UpdateExpenseVC: UIViewController, UITextFieldDelegate {
     
     var expenseArr = [ExpenseModel]()
     var items:[NSManagedObject] = []
+    var filterIncItems: [NSManagedObject] = []
+    var filterExpItems: [NSManagedObject] = []
     var index:Int = 0
     var title1 : String = ""
     var amount : String = ""
     var dateRes : String = ""
     var category : String = ""
     var type: String = ""
+    var check: String = ""
     
     
     let catExpenseArr = CreateExpenseVC().catExpenseArr
@@ -64,7 +67,15 @@ class UpdateExpenseVC: UIViewController, UITextFieldDelegate {
         datePicker.subviews.first?.semanticContentAttribute = .forceRightToLeft
         
         items = fetch()
+        
         let item = items[self.index]
+        print("outer item", item)
+        
+        filterIncItems = filterIncomeFetch()
+        print("filter income", filterIncItems)
+        
+        filterExpItems = filterExpFetch()
+        print("filter exp", filterExpItems)
         
         titleTF.text = title1
         amountTF.text = amount
@@ -164,15 +175,33 @@ class UpdateExpenseVC: UIViewController, UITextFieldDelegate {
                     UIApplication.shared.delegate as? AppDelegate else {
                 return
             }
-            
             let managedContext = appDelegate.persistentContainer.viewContext
-            let item = items[self.index]
-            print("update item", item)
-            item.setValue(titleTF.text, forKeyPath: "title")
-            item.setValue(Int((amountTF.text! as NSString).integerValue), forKeyPath: "amount")
-            item.setValue(mySwitch.isOn ? false : true, forKey: "type")
-            item.setValue(catTF.text, forKeyPath: "category")
-            item.setValue(dateTF.text, forKeyPath: "date")
+        
+            if (check == "income") {
+                print("false")
+                let item = filterIncItems[self.index]
+                item.setValue(titleTF.text, forKeyPath: "title")
+                item.setValue(Int((amountTF.text! as NSString).integerValue), forKeyPath: "amount")
+                item.setValue(mySwitch.isOn ? false : true, forKey: "type")
+                item.setValue(catTF.text, forKeyPath: "category")
+                item.setValue(dateTF.text, forKeyPath: "date")
+            } else if (check == "expense") {
+                print("true")
+                let item = filterExpItems[self.index]
+                item.setValue(titleTF.text, forKeyPath: "title")
+                item.setValue(Int((amountTF.text! as NSString).integerValue), forKeyPath: "amount")
+                item.setValue(mySwitch.isOn ? false : true, forKey: "type")
+                item.setValue(catTF.text, forKeyPath: "category")
+                item.setValue(dateTF.text, forKeyPath: "date")
+            } else {
+                let item = items[self.index]
+                print("update item", item)
+                item.setValue(titleTF.text, forKeyPath: "title")
+                item.setValue(Int((amountTF.text! as NSString).integerValue), forKeyPath: "amount")
+                item.setValue(mySwitch.isOn ? false : true, forKey: "type")
+                item.setValue(catTF.text, forKeyPath: "category")
+                item.setValue(dateTF.text, forKeyPath: "date")
+            }
             do {
                 try managedContext.save()
                 print("updated and saved")
@@ -181,7 +210,7 @@ class UpdateExpenseVC: UIViewController, UITextFieldDelegate {
                 print("Result", result)
                 
                 self.dismiss(animated: true, completion: {
-                    self.delegate?.updateData(expense: result, index: self.index)
+                    self.delegate?.updateData(expense: result, index: self.index, checkValue: self.check)
                 })
             } catch let error as NSError {
                 print("Could not save after updated. \(error), \(error.userInfo)")
@@ -223,6 +252,58 @@ public func fetch ()->[NSManagedObject] {
         print("Could not fetch. \(error), \(error.userInfo)")
     }
     return items
+}
+
+public func filterIncomeFetch ()->[NSManagedObject] {
+    var filterIncItems:[NSManagedObject] = []
+    //1
+    guard let appDelegate =
+            UIApplication.shared.delegate as? AppDelegate else {
+        return filterIncItems
+    }
+
+    let managedContext =
+        appDelegate.persistentContainer.viewContext
+    
+    let predicate = NSPredicate(format: "type = %@", false as NSNumber)
+
+    //2
+    let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Expenses")
+    fetchRequest.predicate = predicate
+
+    //3
+    do {
+        filterIncItems = try managedContext.fetch(fetchRequest)
+    } catch let error as NSError {
+        print("Could not fetch. \(error), \(error.userInfo)")
+    }
+    return filterIncItems
+}
+
+public func filterExpFetch ()->[NSManagedObject] {
+    var filterExpItems:[NSManagedObject] = []
+    //1
+    guard let appDelegate =
+            UIApplication.shared.delegate as? AppDelegate else {
+        return filterExpItems
+    }
+
+    let managedContext =
+        appDelegate.persistentContainer.viewContext
+    
+    let predicate = NSPredicate(format: "type = %@", true as NSNumber)
+
+    //2
+    let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Expenses")
+    fetchRequest.predicate = predicate
+
+    //3
+    do {
+        filterExpItems = try managedContext.fetch(fetchRequest)
+    } catch let error as NSError {
+        print("Could not fetch. \(error), \(error.userInfo)")
+    }
+    return filterExpItems
 }
 
 
