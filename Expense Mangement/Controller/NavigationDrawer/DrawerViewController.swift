@@ -15,7 +15,7 @@ class DrawerViewController: UIViewController {
         "Home",
         "Tax",
         "Analysis",
-        "Income Tax List"
+        "Income Tax List",
     ]
 
     @IBOutlet weak var tableView: UITableView!
@@ -48,6 +48,8 @@ class DrawerViewController: UIViewController {
 }
 
 
+@available(iOS 13.0, *)
+@available(iOS 13.0, *)
 extension DrawerViewController: UITableViewDataSource, UITableViewDelegate {
     
     func numberOfSections(in tableView: UITableView) -> Int {

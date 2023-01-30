@@ -14,6 +14,9 @@ protocol sendCSVData{
     func csvData(expense: ExpenseModel)
 }
 
+@available(iOS 14.0, *)
+@available(iOS 13.0, *)
+@available(iOS 14.0, *)
 class SettingVC: UIViewController, UIDocumentPickerDelegate {
     
     var delegate: sendCSVData?
@@ -126,8 +129,9 @@ class SettingVC: UIViewController, UIDocumentPickerDelegate {
                 do {
                     try managedContext.save()
                     debugPrint("Data Saved")
+                    let generateId = UUID()
                     
-                    let createResultCsv = ExpenseModel(title:String(stringToArr[0]), category: String(stringToArr[1]), amount: Int(String(stringToArr[2])), date: String(stringToArr[4]), type: Int(String(stringToArr[3])) == 1 ? true : false, createdAt: String(stringToArr[5]), updatedAt: String(stringToArr[6]))
+                    let createResultCsv = ExpenseModel(id: generateId, title:String(stringToArr[0]), category: String(stringToArr[1]), amount: Int(String(stringToArr[2])), date: String(stringToArr[4]), type: Int(String(stringToArr[3])) == 1 ? true : false, createdAt: String(stringToArr[5]), updatedAt: String(stringToArr[6]))
                     print("Result", createResultCsv)
 
                     self.dismiss(animated: true, completion: {
@@ -167,14 +171,15 @@ class SettingVC: UIViewController, UIDocumentPickerDelegate {
                 print("AMOUNT", data.value(forKey: "amount") as? Int ?? "")
 
                 let obj = ExpenseModel(
-                                        title: (data.value(forKey: "title") as! String),
-                                        category: (data.value(forKey: "category") as! String),
-                                        amount: (data.value(forKey: "amount") as? Int),
-                                        date: (data.value(forKey: "date") as? String),
-                                        type: (data.value(forKey: "type") as! Bool),
-                                        createdAt: (data.value(forKey: "createdAt") as? String),
-                                        updatedAt: (data.value(forKey: "updatedAt") as? String)
-                                    )
+                    id: (data.value(forKey: "id") as? UUID),
+                    title: (data.value(forKey: "title") as! String),
+                    category: (data.value(forKey: "category") as! String),
+                    amount: (data.value(forKey: "amount") as? Int),
+                    date: (data.value(forKey: "date") as? String),
+                    type: (data.value(forKey: "type") as! Bool),
+                    createdAt: (data.value(forKey: "createdAt") as? String),
+                    updatedAt: (data.value(forKey: "updatedAt") as? String)
+                )
                 
                 self.expenseArr.append(obj)
             }

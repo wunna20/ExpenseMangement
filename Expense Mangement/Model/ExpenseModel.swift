@@ -9,6 +9,7 @@ import Foundation
 
 struct ExpenseModel : Decodable {
 
+    let id: UUID?
     let title: String?
     let category: String?
     let amount: Int?

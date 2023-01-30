@@ -14,8 +14,6 @@ class PersonalIncomeTaxTableViewCell: UITableViewCell {
     @IBOutlet weak var category: UILabel!
     @IBOutlet weak var date: UILabel!
     @IBOutlet weak var incomeAmount: UILabel!
-    @IBOutlet weak var taxAmount: UILabel!
-    @IBOutlet weak var totalAmount: UILabel!
     
     @IBOutlet weak var itemView: UIView!
     

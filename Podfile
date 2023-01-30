@@ -16,6 +16,5 @@ target 'Expense Mangement' do
 	pod 'SwiftCharts', '~> 0.6.5'
 	pod "SwiftCSV"
 	pod 'JJFloatingActionButton'
-	
 
 end

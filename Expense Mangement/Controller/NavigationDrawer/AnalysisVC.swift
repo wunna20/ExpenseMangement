@@ -9,10 +9,11 @@ import UIKit
 import Charts
 import TinyConstraints
 import CoreData
-import SwiftCharts
 import DropDown
 
 
+@available(iOS 13.0, *)
+@available(iOS 13.0, *)
 class AnalysisVC: UIViewController {
     
     var expenseArr = [ExpenseModel]()
@@ -40,6 +41,9 @@ class AnalysisVC: UIViewController {
     var dateExpenseArr: [Int] = []
     let dropDown = DropDown()
     var selected: Int = 0
+    var totalDuplicate: Int = 0
+    
+    var tmpArr = [String?: [ExpenseModel]].self
     
     @IBOutlet weak var vwDropDown: UIView!
     @IBOutlet weak var monthTitle: UILabel!
@@ -90,16 +94,23 @@ class AnalysisVC: UIViewController {
     
     
     func customizeBarChart(dataPoints: [String], values: [Double]) {
+        
 
         var dataBarEntries: [BarChartDataEntry] = []
         for i in 0..<dateExpenseArr.count {
           let dataEntry = BarChartDataEntry(x: Double(i), y: Double(values[i]))
+//            self.barChartView.xAxis.valueFormatter = IndexAxisValueFormatter(values: ["hello"])
+            self.barChartView.xAxis.avoidFirstLastClippingEnabled = true
           dataBarEntries.append(dataEntry)
         }
+        
+        
         let chartDataSet = BarChartDataSet(entries: dataBarEntries, label: "Bar Chart View")
         let chartData = BarChartData(dataSet: chartDataSet)
         barChartView.data = chartData
-
+        barChartView.xAxis.setLabelCount(5, force: true)
+        barChartView.xAxis.avoidFirstLastClippingEnabled = false
+        barChartView.xAxis.forceLabelsEnabled = true
     }
     
     func customizeChart(dataPoints: [String], values: [Double]) {
@@ -189,14 +200,15 @@ class AnalysisVC: UIViewController {
                 print("AMOUNT", data.value(forKey: "amount") as? Int ?? "")
 
                 let obj = ExpenseModel(
-                                        title: (data.value(forKey: "title") as! String),
-                                        category: (data.value(forKey: "category") as! String),
-                                        amount: (data.value(forKey: "amount") as? Int),
-                                        date: (data.value(forKey: "date") as? String),
-                                        type: (data.value(forKey: "type") as! Bool),
-                                        createdAt: (data.value(forKey: "createdAt") as? String),
-                                        updatedAt: (data.value(forKey: "updatedAt") as? String)
-                                    )
+                    id: (data.value(forKey: "id") as? UUID),
+                    title: (data.value(forKey: "title") as! String),
+                    category: (data.value(forKey: "category") as! String),
+                    amount: (data.value(forKey: "amount") as? Int),
+                    date: (data.value(forKey: "date") as? String),
+                    type: (data.value(forKey: "type") as! Bool),
+                    createdAt: (data.value(forKey: "createdAt") as? String),
+                    updatedAt: (data.value(forKey: "updatedAt") as? String)
+                )
 
                 self.expenseArr.append(obj)
             }
@@ -222,18 +234,28 @@ class AnalysisVC: UIViewController {
         let exp = expenseArr.filter{$0.type == true}
         print("exp", exp)
     
-    
-    
         let testing = exp.filter{$0.date! >= "2023/0\(selected + 1)/01"}.filter{$0.date! <= "2023/0\(selected + 1)/31"}
-        print("testing", testing)
+        print("inner testing", testing)
+       
+        let crossReference = Dictionary(grouping: testing, by: \.date)
+        print("cross", crossReference)
         
-        let monthAmt = testing.map{Int($0.amount!)}
-        let testing1 = monthAmt.reduce(0, +)
-        print("monthAmt", monthAmt)
-        dateExpenseArr = [testing1]
+        var tmp = [Int]()
+        for (key, value) in crossReference {
+            totalDuplicate = 0
+            for i in 0..<value.count {
+                totalDuplicate += value[i].amount ?? 0
+                print("totalDup", totalDuplicate)
+                print("value date", value)
+            }
+            tmp.append(totalDuplicate)
+            
+        }
+        print("calDate", tmp)
+        dateExpenseArr = tmp
 
     }
-    
+
     
     func calculateByCategory() {
 
