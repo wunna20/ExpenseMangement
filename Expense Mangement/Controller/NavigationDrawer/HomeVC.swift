@@ -13,7 +13,80 @@ import UniformTypeIdentifiers
 import MobileCoreServices
 import DropDown
 
-class HomeVC: UIViewController, sendCSVData {
+class HomeVC: UIViewController, sendCSVData, Send, SendCreateData {
+
+    func createData(expense: Expenses, check: String) {
+        print("hellocreate", expense)
+        if (testIncome == true) {
+            if (check == "Expense") {
+                dataItem?.append(expense)
+                fetchIncomeData()
+                tableView.reloadData()
+            } else if (check == "Income") {
+                dataItem?.append(expense)
+                tableView.reloadData()
+            }
+        } else if (testExp == true) {
+            if (check == "Income") {
+                dataItem?.append(expense)
+                fetchExpenseData()
+                tableView.reloadData()
+            } else if(check == "Expense") {
+                dataItem?.append(expense)
+                fetchExpenseData()
+                tableView.reloadData()
+            }
+        } else {
+            if (selected != 0) {
+                if (testIncome == true) {
+                    if (check == "Income") {
+                        dataItem?.append(expense)
+                        fetchMonthIncomeData()
+                        tableView.reloadData()
+                    } else if (check == "Expense") {
+                        dataItem?.append(expense)
+                        fetchMonthExpenseData()
+                        tableView.reloadData()
+                    }
+                } else if (testExp == true) {
+                    if (check == "Expense") {
+                        dataItem?.append(expense)
+                        fetchMonthExpenseData()
+                        tableView.reloadData()
+                    } else if (check == "Income") {
+                        dataItem?.append(expense)
+                        fetchMonthIncomeData()
+                        tableView.reloadData()
+                    }
+                }
+                
+            }
+//            else {
+//                dataItem?.append(expense)
+//                tableView.reloadData()
+//            }
+        }
+    }
+    
+    func updateData(expense: Expenses, check: String) {
+        if (testIncome == true) {
+            if (selected == 0) {
+                fetchIncomeData()
+            } else if (selected != 0) {
+                fetchMonthIncomeData()
+            }
+            
+        } else if (testExp == true) {
+            if (selected == 0) {
+                fetchExpenseData()
+            } else if (selected != 0) {
+                fetchMonthExpenseData()
+            }
+        }
+        print("helloUpdate", expense)
+        tableView.reloadData()
+    }
+        
     func csvData(expense: ExpenseModel) {
         print("inner csv", expense)
         self.dismiss(animated: true) { [self] in
@@ -32,6 +105,10 @@ class HomeVC: UIViewController, sendCSVData {
     var selectedItems: [String: Bool] = [:]
     
     var filterIncomeUpdateArr = [ExpenseModel]()
+    
+    
+    var dataItem:[Expenses]?
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var balanceLabel: UILabel!
@@ -86,23 +163,12 @@ class HomeVC: UIViewController, sendCSVData {
         readExpenseData()
         print("testExp", expenseArr)
         calculate()
-//        func updateData(expense: ExpenseModel, index: Int) {
-//            self.dismiss(animated: true) { [self] in
-//                self.expenseArr[index] = expense
-//                calculate()
-//                self.tableView.reloadData()
-//            }
-//        }
         
         let localInc = fetchData.shared.filterIncomeFetch()
         print("localInc", localInc)
         
         let localExp = fetchData.shared.filterExpFetch()
         print("localExp", localExp)
-        
-        for item in expenseArr {
-            print("wunna", item.id)
-        }
         
         dropDown.anchorView = allBtn
         dropDown.dataSource = monthsArr as Any as! [String]
@@ -119,12 +185,110 @@ class HomeVC: UIViewController, sendCSVData {
             testIncome = false
             testExp = false
             testAll = true
-            calculate()
             
+            if (selected == 0) {
+                fetchExpense()
+            } else {
+                fetchMonthData()
+            }
+            calculate()
             tableView.reloadData()
 
         }
         
+        fetchExpense()
+        print("dataitem", dataItem as Any)
+    }
+
+    
+    func fetchExpense() {
+        do {
+            let request = Expenses.fetchRequest() as NSFetchRequest<Expenses>
+            let sort = NSSortDescriptor(key: #keyPath(Expenses.date), ascending: false)
+            request.sortDescriptors = [sort]
+            self.dataItem = try context.fetch(request)
+            
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
+        } catch {
+            print("error")
+        }
+    }
+    
+    func fetchIncomeData() {
+        do {
+            let requeset = Expenses.fetchRequest() as NSFetchRequest<Expenses>
+            let pred = NSPredicate(format: "type = %@", false as NSNumber)
+            requeset.predicate = pred
+            self.dataItem = try context.fetch(requeset)
+        } catch {
+            print("error")
+        }
+    }
+    
+    func fetchExpenseData() {
+        do {
+            let requeset = Expenses.fetchRequest() as NSFetchRequest<Expenses>
+            let pred = NSPredicate(format: "type = %@", true as NSNumber)
+            requeset.predicate = pred
+            self.dataItem = try context.fetch(requeset)
+        } catch {
+            print("error")
+        }
+    }
+    
+    func fetchMonthData() {
+        do {
+            let requeset = Expenses.fetchRequest() as NSFetchRequest<Expenses>
+            
+            print("selMonth", selected)
+            let pred = NSPredicate(format: "date >= %@ AND date <= %@", "2023/0\(selected)/01", "2023/0\(selected)/31")
+            requeset.predicate = pred
+            self.dataItem = try context.fetch(requeset)
+            
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
+        } catch {
+            print("error")
+        }
+    }
+                                              
+    func fetchMonthIncomeData() {
+        do {
+            let requeset = Expenses.fetchRequest() as NSFetchRequest<Expenses>
+            
+            print("selMonth", selected)
+            let pred = NSPredicate(format: "date >= %@ AND date <= %@ AND type = %@", "2023/0\(selected)/01", "2023/0\(selected)/31", false as NSNumber)
+            requeset.predicate = pred
+            self.dataItem = try context.fetch(requeset)
+            
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
+            print("expense data", dataItem)
+        } catch {
+            print("error")
+        }
+    }
+                                              
+    func fetchMonthExpenseData() {
+        do {
+          let requeset = Expenses.fetchRequest() as NSFetchRequest<Expenses>
+          
+          print("selMonth", selected)
+          let pred = NSPredicate(format: "date >= %@ AND date <= %@ AND type = %@", "2023/0\(selected)/01", "2023/0\(selected)/31", true as NSNumber)
+          requeset.predicate = pred
+          self.dataItem = try context.fetch(requeset)
+          
+          DispatchQueue.main.async {
+              self.tableView.reloadData()
+          }
+          print("expense data", dataItem)
+        } catch {
+          print("error")
+        }
     }
     
     @IBAction func menuButton(_ sender: Any) {
@@ -134,6 +298,7 @@ class HomeVC: UIViewController, sendCSVData {
     @IBAction func allTapped(_ sender: Any) {
     
         dropDown.show()
+    
         if (allAndMonthBtn.isTouchInside == true) {
             allBtn.backgroundColor = getUIColor(hex: "#3D5A80")
             allBtn.tintColor = .white
@@ -147,13 +312,12 @@ class HomeVC: UIViewController, sendCSVData {
         
         testExp = false
         testIncome = true
-        filterIncomeArr = expenseArr.filter{$0.type == false}
-        filterExpenseArr = expenseArr.filter{$0.type == true}
         
-        filterMonthIncome = expenseArr.filter{$0.type == false}.filter{$0.date! >= "2023/0\(selected)/01"}.filter{$0.date! <= "2023/0\(selected)/31"}
-        filterMonthExpense = expenseArr.filter{$0.type == true}.filter{$0.date! >= "2023/0\(selected)/01"}.filter{$0.date! <= "2023/0\(selected)/31"}
-        
-        print("incomeTapped", filterIncomeArr)
+        if (selected == 0) {
+            fetchIncomeData()
+        } else {
+            fetchMonthIncomeData()
+        }
         
         if (incomeBtn.isTouchInside == true) {
             incomeBtn.backgroundColor = getUIColor(hex: "#3D5A80")
@@ -167,13 +331,12 @@ class HomeVC: UIViewController, sendCSVData {
     @IBAction func expenseTapped(_ sender: Any) {
         testExp = true
         testIncome = false
-        filterExpenseArr = expenseArr.filter{$0.type == true}
-        filterIncomeArr = expenseArr.filter{$0.type == false}
         
-        filterMonthIncome = expenseArr.filter{$0.type == false}.filter{$0.date! >= "2023/0\(selected)/01"}.filter{$0.date! <= "2023/0\(selected)/31"}
-        filterMonthExpense = expenseArr.filter{$0.type == true}.filter{$0.date! >= "2023/0\(selected)/01"}.filter{$0.date! <= "2023/0\(selected)/31"}
-        
-        print("tap exp", filterExpenseArr)
+        if (selected == 0) {
+            fetchExpenseData()
+        } else {
+            fetchMonthExpenseData()
+        }
         
         if (expenseBtn.isTouchInside == true) {
             expenseBtn.backgroundColor = getUIColor(hex: "#3D5A80")
@@ -189,24 +352,17 @@ class HomeVC: UIViewController, sendCSVData {
         testExp = false
         testIncome = false
         dropDown.show()
-        
-        
     }
     
     func createTapped(_ sender: Any) {
         let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "createExpense") as! CreateExpenseVC
         vc.modalPresentationStyle = .overFullScreen
-        vc.delegate = self
-        vc.myBalance = balance
         if (testIncome == true) {
-            vc.check = "Income"
+            vc.check = "income"
         } else if (testExp == true) {
-            vc.check = "Expense"
-        } else if (testAll == true) {
-            vc.check = "all"
+            vc.check = "expense"
         }
-        
-        
+        vc.delegate = self
         present(vc, animated: true)
     }
     
@@ -463,6 +619,8 @@ class HomeVC: UIViewController, sendCSVData {
         )
     }
 
+    
+
 
 
 
@@ -470,490 +628,93 @@ class HomeVC: UIViewController, sendCSVData {
 extension HomeVC: UITableViewDataSource, UITableViewDelegate {
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
+            return 1
     }
     
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if (testIncome == true) {
-            if (selected == 0) {
-                print("income count", filterIncomeArr.count)
-                return filterIncomeArr.count
-            } else {
-                filterMonthIncome = filterIncomeArr.filter{$0.date! >= "2023/0\(selected)/01"}.filter{$0.date! <= "2023/0\(selected)/31"}
-                print("filterMonthIncome", filterMonthIncome)
-                return filterMonthIncome.count
-            }
-            
-        } else if (testExp == true) {
-            if (selected == 0) {
-                print("expense count", filterExpenseArr.count)
-                return filterExpenseArr.count
-            } else {
-                filterMonthExpense = filterExpenseArr.filter{$0.date! >= "2023/0\(selected)/01"}.filter{$0.date! <= "2023/0\(selected)/31"}
-                print("filterMonthExpense",filterMonthExpense)
-                return filterMonthExpense.count
-            }
-            
-        } else {
-            if (selected == 0) {
-                print("total count", expenseArr)
-                return expenseArr.count
-            } else {
-                filterMonth = expenseArr.filter{$0.date! >= "2023/0\(selected)/01"}.filter{$0.date! <= "2023/0\(selected)/31"}
-                    return filterMonth.count
-            }
-            
-        }
+        return self.dataItem?.count ?? 0
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cellIdentifier = "ExpenseTableViewCell"
         let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier,for: indexPath) as! ExpenseTableViewCell
-        print("tablecount",filterIncomeArr.count,filterExpenseArr.count,expenseArr.count, filterMonth.count)
         
-        if (testIncome == true){
-            if (selected == 0) {
-                let income = filterIncomeArr[indexPath.row]
-                print("index income", income)
-                cell.title.text = income.title
-                cell.category.text = income.category
-                
-                let curFormat = NumberFormatter()
-                curFormat.usesGroupingSeparator = true
-                curFormat.locale = Locale.current
-                curFormat.maximumFractionDigits = 2
-                curFormat.decimalSeparator = "."
-                curFormat.numberStyle = .decimal
-                
-                cell.amount.text = curFormat.string(from: income.amount! as NSNumber)
-                cell.date.text = income.date
-                cell.type.text = String(income.type!) == "true" ? "Expense" : "Income"
-                if (cell.type.text == "Expense") {
-                    cell.itemView.backgroundColor = getUIColor(hex: "#ee6c4d")
-                } else {
-                    cell.itemView.backgroundColor = getUIColor(hex: "#98c1d9")
-                }
-                return cell
-            } else {
-                let income = filterMonthIncome[indexPath.row]
-                print("index income", income)
-                cell.title.text = income.title
-                cell.category.text = income.category
-                
-                let curFormat = NumberFormatter()
-                curFormat.usesGroupingSeparator = true
-                curFormat.locale = Locale.current
-                curFormat.maximumFractionDigits = 2
-                curFormat.decimalSeparator = "."
-                curFormat.numberStyle = .decimal
-                
-                cell.amount.text = curFormat.string(from: income.amount! as NSNumber)
-                cell.date.text = income.date
-                cell.type.text = String(income.type!) == "true" ? "Expense" : "Income"
-                if (cell.type.text == "Expense") {
-                    cell.itemView.backgroundColor = getUIColor(hex: "#ee6c4d")
-                } else {
-                    cell.itemView.backgroundColor = getUIColor(hex: "#98c1d9")
-                }
-                return cell
-            }
-                
-            
-        } else if (testExp == true) {
-            
-            if (selected == 0) {
-                print("inner Exp", filterExpenseArr, indexPath)
-                let expense = filterExpenseArr[indexPath.row]
-                print("index expense", expense)
-                
-                let curFormat = NumberFormatter()
-                curFormat.usesGroupingSeparator = true
-                curFormat.locale = Locale.current
-                curFormat.maximumFractionDigits = 2
-                curFormat.decimalSeparator = "."
-                curFormat.numberStyle = .decimal
-                
-                cell.title.text = expense.title
-                cell.category.text = expense.category
-                cell.amount.text = curFormat.string(from: expense.amount! as NSNumber)
-                cell.date.text = expense.date
-                cell.type.text = String(expense.type!) == "true" ? "Expense" : "Income"
-                
-                if (cell.type.text == "Expense") {
-                    cell.itemView.backgroundColor = getUIColor(hex: "#ee6c4d")
-                } else {
-                    cell.itemView.backgroundColor = getUIColor(hex: "#98c1d9")
-                }
-                
-                return cell
-            } else {
-                let expense = filterMonthExpense[indexPath.row]
-                print("index expense", expense)
-                
-                let curFormat = NumberFormatter()
-                curFormat.usesGroupingSeparator = true
-                curFormat.locale = Locale.current
-                curFormat.maximumFractionDigits = 2
-                curFormat.decimalSeparator = "."
-                curFormat.numberStyle = .decimal
-                
-                cell.title.text = expense.title
-                cell.category.text = expense.category
-                cell.amount.text = curFormat.string(from: expense.amount! as NSNumber)
-                cell.date.text = expense.date
-                cell.type.text = String(expense.type!) == "true" ? "Expense" : "Income"
-                
-                if (cell.type.text == "Expense") {
-                    cell.itemView.backgroundColor = getUIColor(hex: "#ee6c4d")
-                } else {
-                    cell.itemView.backgroundColor = getUIColor(hex: "#98c1d9")
-                }
-                
-                return cell
-            }
+        let item = self.dataItem![indexPath.row]
+        cell.title?.text = item.title
+        cell.category?.text = item.category
+        cell.amount?.text = String(item.amount)
+        cell.date?.text = item.date
+        cell.type?.text = String(item.type) == "true" ? "Expense" : "Income"
+        if (cell.type.text == "Expense") {
+          cell.itemView.backgroundColor = getUIColor(hex: "#ee6c4d")
         } else {
-            let selectMonth = expenseArr.filter{$0.date! >= "2023/0\(selected)/01"}.filter{$0.date! <= "2023/0\(selected)/31"}
-            let expense = selected == 0 ? expenseArr[indexPath.row] : selectMonth[indexPath.row]
-            print("outer expense", expense)
-            cell.title.text = expense.title
-            cell.category.text = expense.category
-            
-            let curFormat = NumberFormatter()
-            curFormat.usesGroupingSeparator = true
-            curFormat.locale = Locale.current
-            curFormat.maximumFractionDigits = 2
-            curFormat.decimalSeparator = "."
-            curFormat.numberStyle = .decimal
-            
-            cell.amount.text = curFormat.string(from: expense.amount! as NSNumber)
-            cell.date.text = expense.date
-            cell.type.text = String(expense.type!) == "true" ? "Expense" : "Income"
-            if (cell.type.text == "Expense") {
-                cell.itemView.backgroundColor = getUIColor(hex: "#ee6c4d")
-            } else {
-                cell.itemView.backgroundColor = getUIColor(hex: "#98c1d9")
-            }
-            return cell
+          cell.itemView.backgroundColor = getUIColor(hex: "#98c1d9")
         }
+        return cell
     }
     
-    
-    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath)
-                -> UISwipeActionsConfiguration? {
-                    let deleteAction = UIContextualAction(style: .destructive, title: nil) { [self] (_, _, completionHandler) in
-                    // delete the item here
-                    guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {return}
-                    let managedContext = appDelegate.persistentContainer.viewContext
-                    let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Expenses")
-                        
-                    let predicate = NSPredicate(format: "type = %@", false as NSNumber)
-                    let expPredicate = NSPredicate(format: "type = %@", true as NSNumber)
-                    let incomeFetch = fetchRequest.predicate
-                        print("incomeFetch", incomeFetch)
-                                        
-                    do {
-                        guard let result = try managedContext.fetch(fetchRequest) as? [NSManagedObject] else {
-                            return
-                        }
-                        if (testIncome == true) {
-                            let localInc = fetchData.shared.filterIncomeFetch()
-                            let objc = localInc[indexPath.row]
-                            managedContext.delete(objc)
-                        } else if (testExp == true) {
-                            let localExp = fetchData.shared.filterExpFetch()
-                            let objc = localExp[indexPath.row]
-                            managedContext.delete(objc)
-                        } else {
-                            let objc = result[indexPath.row]
-                            managedContext.delete(objc)
-                        }
-                            
-                        do {
-                            try managedContext.save()
-                            if (testIncome == true) {
-                                let index = filterIncomeArr[indexPath.row].id
-                                let indexExp = expenseArr.firstIndex(where: {$0.id == index})
-                                expenseArr.remove(at: indexExp!)
-                                filterIncomeArr.remove(at: indexPath.row)
-                            } else if (testExp == true) {
-                                let index = filterExpenseArr[indexPath.row].id
-                                let indexExp = expenseArr.firstIndex(where: {$0.id == index})
-                                expenseArr.remove(at: indexExp!)
-                                filterExpenseArr.remove(at: indexPath.row)
-
-                            } else {
-                                expenseArr.remove(at: indexPath.row)
-                            }
-
-                            calculate()
-                            print("exp Arr", expenseArr)
-                            debugPrint("Record deleted")
-                        } catch let error as NSError {
-                            debugPrint(error)
-                        }
-                    } catch let error as NSError {
-                        debugPrint(error)
-                    }
-                    
-                    tableView.reloadData()
-                    
-                    completionHandler(true)
-                }
-                deleteAction.image = UIImage(systemName: "trash")
-                deleteAction.backgroundColor = .systemRed
-                let configuration = UISwipeActionsConfiguration(actions: [deleteAction])
-                return configuration
-        }
-
-
-    
     func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        return true
+           return true
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
         let cellIdentifier = "ExpenseTableViewCell"
         let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier,for: indexPath as IndexPath) as! ExpenseTableViewCell
         
-        
-        if (testIncome == true) {
-            
-            if (selected == 0) {
-                let income = filterIncomeArr[indexPath.row]
-                cell.title.text = income.title
-                cell.category.text = income.category
-                cell.amount.text = String(income.amount!)
-                cell.date.text = income.date
-                cell.type.text = String(income.type!) == "true" ? "Expense" : "Income"
-                
-                tableView.deselectRow(at: indexPath, animated: true)
-                let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "updateExpense") as! UpdateExpenseVC
-                vc.modalPresentationStyle = .overFullScreen
-                vc.index = indexPath.row
-                vc.id = income.id ?? UUID()
-                vc.title1 = cell.title.text!
-                vc.amount = cell.amount.text!
-                vc.category = cell.category.text!
-                vc.dateRes = cell.date.text!
-                vc.type = cell.type.text!
-                vc.check = "income"
-                vc.delegate = self
-
-                present(vc, animated: true)
-            } else {
-                let income = filterMonthIncome[indexPath.row]
-                cell.title.text = income.title
-                cell.category.text = income.category
-                cell.amount.text = String(income.amount!)
-                cell.date.text = income.date
-                cell.type.text = String(income.type!) == "true" ? "Expense" : "Income"
-                
-                tableView.deselectRow(at: indexPath, animated: true)
-                let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "updateExpense") as! UpdateExpenseVC
-                vc.modalPresentationStyle = .overFullScreen
-                vc.index = indexPath.row
-                vc.id = income.id ?? UUID()
-                vc.title1 = cell.title.text!
-                vc.amount = cell.amount.text!
-                vc.category = cell.category.text!
-                vc.dateRes = cell.date.text!
-                vc.type = cell.type.text!
-                vc.check = "income selectMonth"
-                vc.select = selected
-                vc.delegate = self
-
-                present(vc, animated: true)
-            }
-            
-        } else if (testExp == true) {
-            
-            if (selected == 0) {
-                let expense = filterExpenseArr[indexPath.row]
-                print("expenseDetail", expense)
-                print("hello", indexPath)
-                cell.title.text = expense.title
-                cell.category.text = expense.category
-                cell.amount.text = String(expense.amount!)
-                cell.date.text = expense.date
-                cell.type.text = String(expense.type!) == "true" ? "Expense" : "Income"
-                
-                tableView.deselectRow(at: indexPath, animated: true)
-                let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "updateExpense") as! UpdateExpenseVC
-                vc.modalPresentationStyle = .overFullScreen
-                vc.index = indexPath.row
-                vc.id = expense.id ?? UUID()
-                vc.title1 = cell.title.text!
-                vc.amount = cell.amount.text!
-                vc.category = cell.category.text!
-                vc.dateRes = cell.date.text!
-                vc.type = cell.type.text!
-                vc.check = "expense"
-                vc.delegate = self
-
-                present(vc, animated: true)
-            } else {
-                let expense = filterMonthExpense[indexPath.row]
-                print("expenseDetail", expense)
-                print("hello", indexPath)
-                cell.title.text = expense.title
-                cell.category.text = expense.category
-                cell.amount.text = String(expense.amount!)
-                cell.date.text = expense.date
-                cell.type.text = String(expense.type!) == "true" ? "Expense" : "Income"
-                
-                tableView.deselectRow(at: indexPath, animated: true)
-                let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "updateExpense") as! UpdateExpenseVC
-                vc.modalPresentationStyle = .overFullScreen
-                vc.index = indexPath.row
-                vc.id = expense.id ?? UUID()
-                vc.title1 = cell.title.text!
-                vc.amount = cell.amount.text!
-                vc.category = cell.category.text!
-                vc.dateRes = cell.date.text!
-                vc.type = cell.type.text!
-                vc.check = "expense selectMonth"
-                vc.select = selected
-                vc.delegate = self
-
-                present(vc, animated: true)
-            }
-            
+        let item = self.dataItem![indexPath.row]
+        cell.title?.text = item.title
+        cell.category?.text = item.category
+        cell.amount?.text = String(item.amount)
+        cell.date?.text = item.date
+        cell.type?.text = String(item.type) == "true" ? "Expense" : "Income"
+        if (cell.type.text == "Expense") {
+          cell.itemView.backgroundColor = getUIColor(hex: "#ee6c4d")
         } else {
-            let selectMonth = expenseArr.filter{$0.date! >= "2023/0\(selected)/01"}.filter{$0.date! <= "2023/0\(selected)/31"}
-            let expense = selected == 0 ? expenseArr[indexPath.row] : selectMonth[indexPath.row]
-            print("expenseDetail", expense)
-            cell.title.text = expense.title
-            cell.category.text = expense.category
-            cell.amount.text = String(expense.amount!)
-            cell.date.text = expense.date
-            cell.type.text = String(expense.type!) == "true" ? "Expense" : "Income"
-
-            tableView.deselectRow(at: indexPath, animated: true)
-            let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "updateExpense") as! UpdateExpenseVC
-            vc.modalPresentationStyle = .overFullScreen
-            vc.index = indexPath.row
-            vc.id = expense.id ?? UUID()
-            vc.title1 = cell.title.text!
-            vc.amount = cell.amount.text!
-            vc.category = cell.category.text!
-            vc.dateRes = cell.date.text!
-            vc.type = cell.type.text!
-            vc.check = selected == 0 ? "all" : "notAll"
-            vc.selectMonth = selected
-            vc.delegate = self
-
-            tableView.reloadData()
-            present(vc, animated: true)
+          cell.itemView.backgroundColor = getUIColor(hex: "#98c1d9")
         }
-        
-    }
-}
 
-@available(iOS 14.0, *)
-
-extension HomeVC: Send {
-    func updateData(expense: ExpenseModel, index: Int, checkValue: String, check: Bool) {
-        print("inner Expense", expense, index, checkValue)
-        self.dismiss(animated: true) { [self] in
-            if (checkValue == "income") {
-                print("check income")
-                if (check == true) {
-//                    self.filterExpenseArr[index] = expense
-                    let indexExp = expenseArr.firstIndex(where: {$0.id == expense.id})
-                    print("indexExp", indexExp)
-                    self.expenseArr[(indexExp)!] = expense
-                } else {
-                    self.filterIncomeArr[index] = expense
-                }
-//                self.filterIncomeArr[index] = expense
-//                print("index", index, filterIncomeArr)
-//                let indexExp = expenseArr.firstIndex(where: {$0.id == expense.id})
-//                print("indexExp", indexExp)
-//                self.expenseArr[(indexExp)!] = expense
-                calculate()
-                testIncome = true
-                self.tableView.reloadData()
-            } else if (checkValue == "expense") {
-                if (check == false) {
-                    let indexExp = expenseArr.firstIndex(where: {$0.id == expense.id})
-                    print("indexExp", indexExp)
-                    self.expenseArr[(indexExp)!] = expense
-                } else {
-                    self.filterExpenseArr[index] = expense
-                }
-                self.filterExpenseArr[index] = expense
-//                let indexExp = expenseArr.firstIndex(where: {$0.id == expense.id})
-//                print("indexExp", indexExp)
-//                self.expenseArr[(indexExp)!] = expense
-                calculate()
-                testExp = true
-                self.tableView.reloadData()
-            } else if (checkValue == "notAll") {
-                self.filterMonth[index] = expense
-                let indexExp = expenseArr.firstIndex(where: {$0.id == expense.id})
-                self.expenseArr[(indexExp)!] = expense
-                calculate()
-                testIncome = false
-                testExp = false
-                self.tableView.reloadData()
-            } else if (checkValue == "income selectMonth") {
-                print("check select income")
-                self.filterMonthIncome[index] = expense
-                print("self Month", filterMonthIncome)
-                let indexExp = expenseArr.firstIndex(where: {$0.id == expense.id})
-                self.expenseArr[(indexExp)!] = expense
-                calculate()
-                testIncome = true
-                self.tableView.reloadData()
-                
-            } else if (checkValue == "expense selectMonth") {
-                self.filterMonthExpense[index] = expense
-                let indexExp = expenseArr.firstIndex(where: {$0.id == expense.id})
-                self.expenseArr[(indexExp)!] = expense
-                calculate()
-                testExp = true
-                self.tableView.reloadData()
-        }else {
-                self.expenseArr[index] = expense
-                calculate()
-                testIncome = false
-                testExp = false
-                self.tableView.reloadData()
-            }
+        tableView.deselectRow(at: indexPath, animated: true)
+        let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "updateExpense") as! UpdateExpenseVC
+        vc.modalPresentationStyle = .overFullScreen
+        vc.updateItem = item
+        if (testIncome == true) {
+            vc.check = "Income"
+        } else if (testExp == true) {
+            vc.check = "Expense"
         }
+        vc.delegate = self
+        tableView.reloadData()
+        present(vc, animated: true)
     }
-}
-@available(iOS 14.0, *)
-
-extension HomeVC: SendCreateData {
     
-    func createData(expense: ExpenseModel, checkValue: String, check: Bool) {
-        print("inner create Expense", expense)
-        self.dismiss(animated: true) { [self] in
-            if (checkValue == "Income") {
-                    print("income success")
-                check == true ? self.filterExpenseArr.append(expense) : self.filterIncomeArr.append(expense)
-//                    self.filterIncomeArr.append(expense)
-                    self.expenseArr.append(expense)
-                    self.tableView.reloadData()
-                    print("Total Income", filterIncomeArr.count)
-                    calculate()
-            } else if (checkValue == "Expense") {
-                    print("expense success")
-                check == false ? self.filterIncomeArr.append(expense) : self.filterExpenseArr.append(expense)
-                    self.expenseArr.append(expense)
-                    self.tableView.reloadData()
-                    print("Total Expense", filterExpenseArr.count)
-                    calculate()
-            } else if (checkValue == "All") {
-                self.expenseArr.append(expense)
-                self.tableView.reloadData()
-                calculate()
-            }
-        }
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath)
+                  -> UISwipeActionsConfiguration? {
+                      let action = UIContextualAction(style: .destructive, title: "Delete") { [self] (action, view, completionHandler) in
+                          let itemDel = self.dataItem![indexPath.row]
+                          self.context.delete(itemDel)
+                          
+                          do {
+                              try self.context.save()
+                          } catch {
+                              
+                          }
+                          if (testIncome == true) {
+                              self.fetchIncomeData()
+                          } else if (testExp == true) {
+                              self.fetchExpenseData()
+                          } else {
+                              self.fetchExpense()
+                          }
+                          tableView.reloadData()
+                      }
+                return UISwipeActionsConfiguration(actions: [action])
     }
+
+    
 }
+
+
 
 
 

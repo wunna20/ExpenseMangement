@@ -259,7 +259,7 @@ class AnalysisVC: UIViewController {
     
     func calculateByCategory() {
 
-        let exp = expenseArr.filter{$0.type == true}
+        let exp = expenseArr.filter{$0.type == true}.filter{$0.date! >= "2023/0\(selected + 1)/01"}.filter{$0.date! <= "2023/0\(selected + 1)/31"}
 
         let foodPrice = exp.filter{$0.category == "Food"}.map{$0.amount!}.reduce(0, +)
         let utilPrice = exp.filter{$0.category == "Utilities"}.map{$0.amount!}.reduce(0, +)
@@ -274,7 +274,7 @@ class AnalysisVC: UIViewController {
     
     func calculateByIncomeCategory() {
         
-        let exp = expenseArr.filter{$0.type == false}
+        let exp = expenseArr.filter{$0.type == false}.filter{$0.date! >= "2023/0\(selected + 1)/01"}.filter{$0.date! <= "2023/0\(selected + 1)/31"}
         print("filter income", exp.count)
         
         let salPrice = exp.filter{$0.category == "Salary"}.map{$0.amount!}.reduce(0, +)

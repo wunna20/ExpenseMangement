@@ -10,7 +10,7 @@ import DropDown
 import CoreData
 
 protocol SendCreateData{
-    func createData(expense: ExpenseModel, checkValue: String, check: Bool)
+    func createData(expense: Expenses, check: String)
 }
 
 
@@ -18,10 +18,7 @@ protocol SendCreateData{
 class CreateExpenseVC: UIViewController, UINavigationControllerDelegate {
     
     var expenseArr = [ExpenseModel]()
-   
     var delegate: SendCreateData?
-    var myBalance: Int = 0
-    var check: String = ""
     
     @IBOutlet weak var vwDropDown: UIView!
     @IBOutlet weak var catTitle: UILabel!
@@ -50,7 +47,8 @@ class CreateExpenseVC: UIViewController, UINavigationControllerDelegate {
     let dateFormatter = DateFormatter()
     
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-    var items: [Expenses]?
+    var dataItem: [Expenses]?
+    var check: String = ""
 
     
     override func viewDidLoad() {
@@ -72,8 +70,6 @@ class CreateExpenseVC: UIViewController, UINavigationControllerDelegate {
         dropDown.selectionAction = { [unowned self] (index: Int, item: String) in
             print("Selected item: \(item) at index: \(index)")
             catTitle.text = mySwitch.isOn == true ? catIncomeArr[index] : catExpenseArr[index]
-            print("Income cartTitle", catTitle.text)
-//            validation()
             if (catTitle.text == "Select Category") {
                 vwDropDown.layer.borderColor = UIColor.red.cgColor
                 vwDropDown.layer.borderWidth = 1.0
@@ -95,8 +91,6 @@ class CreateExpenseVC: UIViewController, UINavigationControllerDelegate {
         dateTF.isHidden = true
         readExpenseData()
         hideKeyboardWhenTappedAround()
-        
-        print("my balance", myBalance)
     }
     
     @objc func dismissKeyboard() {
@@ -160,72 +154,36 @@ class CreateExpenseVC: UIViewController, UINavigationControllerDelegate {
         if (titleTF.text?.isEmpty == true || ((amountTF.text?.isEmpty) == true) || (catTitle.text == "Select Category")) {
             validation()
         } else {
-            
             print("create")
             //       get current date
             let date = Date()
             dateFormatter.dateFormat = "yyyy/MM/dd"
             let currentDate = dateFormatter.string(from: date)
             
-            guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {return}
-            let managedContext = appDelegate.persistentContainer.viewContext
-            guard let personEntity = NSEntityDescription.entity(forEntityName: "Expenses", in: managedContext) else { return }
-            let expense = NSManagedObject(entity: personEntity, insertInto: managedContext)
 
-
-            expense.setValue(UUID(), forKey: "id")
-            expense.setValue(titleTF.text, forKey: "title")
-            expense.setValue(catTitle.text, forKey: "category")
-            expense.setValue(Int(amountTF.text!), forKey: "amount")
-            expense.setValue(mySwitch.isOn ? false : true, forKey: "type")
-            expense.setValue(dateTF.text, forKey: "date")
-            expense.setValue(currentDate, forKey: "createdAt")
-            expense.setValue(currentDate, forKey: "updatedAt")
+            let newExpense = Expenses(context: self.context)
+            newExpense.id = UUID()
+            newExpense.title = titleTF.text
+            newExpense.category = catTitle.text
+            newExpense.amount = Int64(Int(amountTF.text!) ?? 0)
+            newExpense.type = mySwitch.isOn ? false : true
+            newExpense.date = dateTF.text
+            newExpense.createdAt = currentDate
+            newExpense.updatedAt = currentDate
 
             do {
-                try managedContext.save()
-                debugPrint("Data Saved")
-
-                let generateId = UUID()
-                let createResult = ExpenseModel(id: generateId, title: titleTF.text, category: catTitle.text, amount: Int((amountTF.text! as NSString).integerValue), date: dateTF.text, type: mySwitch.isOn ? false : true, createdAt: dateTF.text, updatedAt: dateTF.text)
-                print("Result", createResult)
-                print("gener", generateId)
-
-                if (check == "Income") {
-                    self.dismiss(animated: true, completion: { [self] in
-                        self.delegate?.createData(expense: createResult, checkValue: "Income", check: mySwitch.isOn ? false : true)
-                    })
-                } else if (check == "Expense") {
-                    self.dismiss(animated: true, completion: { [self] in
-                        self.delegate?.createData(expense: createResult, checkValue: "Expense", check: mySwitch.isOn ? false : true)
-                    })
-                } else {
-                    self.dismiss(animated: true, completion: { [self] in
-                        self.delegate?.createData(expense: createResult, checkValue: "All", check: mySwitch.isOn ? false : true)
-                    })
-                }
-
+                try context.save()
+                print("created")
+                self.dismiss(animated: true, completion: { [self] in
+                    self.delegate?.createData(expense: newExpense, check: mySwitch.isOn ? "Income" : "Expense")
+                })
+                
             } catch let error as NSError {
                 debugPrint("error", error)
             }
         }
-            
-//            let newExpense = Expenses(context: self.context)
-//            newExpense.id = UUID()
-//            newExpense.title = titleTF.text
-//            newExpense.category = catTitle.text
-//            newExpense.amount = Int(amountTF.text)
-//            newExpense.type = mySwitch.isOn ? false : true
-//            newExpense.date = dateTF.text
-//            newExpense.createdAt = currentDate
-//            newExpense.updatedAt = currentDate
-//
-//            do {
-//                try context.save()
-//            } catch let error as NSError {
-//                debugPrint("error", error)
-//            }
     }
+
     
     
     func validation() {
@@ -244,12 +202,6 @@ class CreateExpenseVC: UIViewController, UINavigationControllerDelegate {
         } else if (amountTF.text!.count >= 1) {
             amountChanged(amountTF!)
         }
-        
-//        if Int(amountTF.text!)! > myBalance {
-//            amountTF.layer.borderColor = UIColor.red.cgColor
-//            amountTF.layer.borderWidth = 1.0
-//            amountErr.text = "Amount is greater than my balance"
-//        }
         
          if (catTitle.text == "Select Category") {
             vwDropDown.layer.borderColor = UIColor.red.cgColor

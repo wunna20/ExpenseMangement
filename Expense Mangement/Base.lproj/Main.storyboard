@@ -1327,7 +1327,7 @@
                                                 </connections>
                                             </button>
                                         </subviews>
-                                        <color key="backgroundColor" systemColor="systemGrayColor"/>
+                                        <color key="backgroundColor" red="0.23921568627450979" green="0.3529411764705882" blue="0.50196078431372548" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         <constraints>
                                             <constraint firstItem="wZe-rL-Kdp" firstAttribute="leading" secondItem="SLe-sT-TgZ" secondAttribute="leading" id="LAC-GT-ujm"/>
                                             <constraint firstItem="eac-5W-gJN" firstAttribute="centerY" secondItem="wZe-rL-Kdp" secondAttribute="centerY" id="R3G-ux-a7e"/>

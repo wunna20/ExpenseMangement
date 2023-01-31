@@ -11,7 +11,7 @@ import DropDown
 
 protocol Send{
     // index => call expense id
-    func updateData(expense: ExpenseModel, index: Int, checkValue: String, check: Bool)
+    func updateData(expense: Expenses, check: String)
 }
 
 class UpdateExpenseVC: UIViewController, UITextFieldDelegate {
@@ -51,21 +51,22 @@ class UpdateExpenseVC: UIViewController, UITextFieldDelegate {
     var dateRes : String = ""
     var category : String = ""
     var type: String = ""
-    var check: String = ""
+    
     var select: Int = 0
     var selectMonth: Int = 0
-    
     
     let catExpenseArr = CreateExpenseVC().catExpenseArr
     let catIncomeArr = CreateExpenseVC().catIncomeArr
 
     let dateFormatter = DateFormatter()
     let dropDown = DropDown()
-    
+    var updateItem = Expenses()
+    var check: String = ""
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+//        print("updatetest",updateItem.objectID)
         datePicker.semanticContentAttribute = .forceRightToLeft
         datePicker.subviews.first?.semanticContentAttribute = .forceRightToLeft
         
@@ -82,14 +83,12 @@ class UpdateExpenseVC: UIViewController, UITextFieldDelegate {
         
         print("check month", selectMonth)
         fetchData.shared.selectMonth = selectMonth
-//        filterSelectMonth = filterMonthItemFetch()
-//        print("filter res", filterSelectMonth)
         
         
-        titleTF.text = title1
-        amountTF.text = amount
-        catTF.text = category
-        dateTF.text = dateRes
+        titleTF.text = updateItem.title
+        amountTF.text = String(updateItem.amount)
+        catTF.text = updateItem.category
+        dateTF.text = updateItem.date
         
         print("item id", id)
         print("selectMonth", select)
@@ -111,11 +110,11 @@ class UpdateExpenseVC: UIViewController, UITextFieldDelegate {
         dateFormatter.dateFormat = "yyyy/MM/dd"
         dateTF.inputView = datePicker
         datePicker.datePickerMode = .date
-        datePicker.date = dateFormatter.date(from: dateRes)!
+//        datePicker.date = dateFormatter.date(from: dateRes)!
 
         
         dateTF.isHidden = true
-        if (type == "Income") {
+        if (updateItem.type == false) {
             mySwitch.isOn = true
         } else {
             mySwitch.isOn = false
@@ -181,117 +180,41 @@ class UpdateExpenseVC: UIViewController, UITextFieldDelegate {
     @IBAction func updateTapped(_ sender: Any) {
         
 //              get current date
-            let date = Date()
-            dateFormatter.dateFormat = "MM/dd/yyyy"
-            let currentDate = dateFormatter.string(from: date)
+        let date = Date()
+        dateFormatter.dateFormat = "MM/dd/yyyy"
+        let currentDate = dateFormatter.string(from: date)
             
-            guard let appDelegate =
-                    UIApplication.shared.delegate as? AppDelegate else {
-                return
-            }
-        let managedContext = appDelegate.persistentContainer.viewContext
-        
-            if (check == "income") {
-                print("false")
-                
-                let item = filterIncItems[self.index]
-//                let item = select == 0 ? filterIncItems[self.index] : 
-                item.setValue(titleTF.text, forKeyPath: "title")
-                item.setValue(Int((amountTF.text! as NSString).integerValue), forKeyPath: "amount")
-                item.setValue(mySwitch.isOn ? false : true, forKey: "type")
-                item.setValue(catTF.text, forKeyPath: "category")
-                item.setValue(dateTF.text, forKeyPath: "date")
-            } else if (check == "expense") {
-                print("true")
-                let item = filterExpItems[self.index]
-                item.setValue(titleTF.text, forKeyPath: "title")
-                item.setValue(Int((amountTF.text! as NSString).integerValue), forKeyPath: "amount")
-                item.setValue(mySwitch.isOn ? false : true, forKey: "type")
-                item.setValue(catTF.text, forKeyPath: "category")
-                item.setValue(dateTF.text, forKeyPath: "date")
-            } else {
-                if (check == "all") {
-                    let item = items[self.index]
-                    print("update item", item)
-                    item.setValue(titleTF.text, forKeyPath: "title")
-                    item.setValue(Int((amountTF.text! as NSString).integerValue), forKeyPath: "amount")
-                    item.setValue(mySwitch.isOn ? false : true, forKey: "type")
-                    item.setValue(catTF.text, forKeyPath: "category")
-                    item.setValue(dateTF.text, forKeyPath: "date")
-                } else if (check == "income selectMonth") {
-                    print("hello income", select)
-                    var filterMonthItems:[NSManagedObject] = []
-                    let appDelegate = UIApplication.shared.delegate as? AppDelegate
-                    let managedContext = appDelegate!.persistentContainer.viewContext
-                    print("outer select", select)
-                    let predicate = NSPredicate(format: "date >= %@ AND date <= %@ AND type = %@", "2023/0\(select)/01", "2023/0\(select)/31", false as NSNumber)
-                    let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Expenses")
-                    fetchRequest.predicate = predicate
 
-                    do {
-                        filterMonthItems = try managedContext.fetch(fetchRequest)
-                        print("hello fetch", filterMonthItems)
-                        
-                    } catch let error as NSError {
-                        print("Could not fetch. \(error), \(error.userInfo)")
-                    }
-                
-                print("updateFilter", filterMonthItems)
-                let item = filterMonthItems[self.index]
-                    print("update item", item)
-                    item.setValue(titleTF.text, forKeyPath: "title")
-                    item.setValue(Int((amountTF.text! as NSString).integerValue), forKeyPath: "amount")
-                    item.setValue(mySwitch.isOn ? false : true, forKey: "type")
-                    item.setValue(catTF.text, forKeyPath: "category")
-                    item.setValue(dateTF.text, forKeyPath: "date")
-                } else if (check == "expense selectMonth") {
-                    print("hello expense")
-                    var filterMonthItems:[NSManagedObject] = []
-                    let appDelegate = UIApplication.shared.delegate as? AppDelegate
-                    let managedContext = appDelegate!.persistentContainer.viewContext
-                    let predicate = NSPredicate(format: "date >= %@ AND date <= %@ AND type = %@", "2023/0\(select)/01", "2023/0\(select)/31", true as NSNumber)
-                    let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Expenses")
-                    fetchRequest.predicate = predicate
-                    do {
-                        filterMonthItems = try managedContext.fetch(fetchRequest)
-                        print("hello fetch", filterMonthItems)
-                    } catch let error as NSError {
-                        print("Could not fetch. \(error), \(error.userInfo)")
-                    }
-                    
-                    let item = filterMonthItems[self.index]
-                    print("update item", item)
-                    item.setValue(titleTF.text, forKeyPath: "title")
-                    item.setValue(Int((amountTF.text! as NSString).integerValue), forKeyPath: "amount")
-                    item.setValue(mySwitch.isOn ? false : true, forKey: "type")
-                    item.setValue(catTF.text, forKeyPath: "category")
-                    item.setValue(dateTF.text, forKeyPath: "date")
+        updateItem.id = UUID()
+        updateItem.title = titleTF.text
+        updateItem.category = catTF.text
+        updateItem.amount = Int64(Int(amountTF.text!) ?? 0)
+        updateItem.type = mySwitch.isOn ? false : true
+        updateItem.date = dateTF.text
+        updateItem.createdAt = currentDate
+        updateItem.updatedAt = currentDate
+
+        do {
+            if (mySwitch.isOn == true && !catIncomeArr.contains(catTF.text!)) ||  (mySwitch.isOn == false && !catExpenseArr.contains(catTF.text!)) {
+                let alertController = UIAlertController(title: "Alert title", message: "Category name and type must be same", preferredStyle: .alert)
+                let cancelAction = UIAlertAction(title: "Please Try Again", style: .cancel) {
+                    (action: UIAlertAction!) in print("Cancel button tapped");
                 }
+                alertController.addAction(cancelAction)
+                self.present(alertController, animated: true, completion: nil)
+            } else {
+                try context.save()
+                print("updated")
+               
+                self.dismiss(animated: true, completion: { [self] in
+                    self.delegate?.updateData(expense: updateItem, check: mySwitch.isOn ? "Income" : "Expense")
+                })
+                print("protocol")
             }
-            do {
-                if (mySwitch.isOn == true && !catIncomeArr.contains(catTF.text!)) ||  (mySwitch.isOn == false && !catExpenseArr.contains(catTF.text!)) {
-                    let alertController = UIAlertController(title: "Alert title", message: "Category name and type must be same", preferredStyle: .alert)
-                    let cancelAction = UIAlertAction(title: "Please Try Again", style: .cancel) {
-                        (action: UIAlertAction!) in print("Cancel button tapped");
-                    }
-                    alertController.addAction(cancelAction)
-                    self.present(alertController, animated: true, completion: nil)
-                } else {
-                    try managedContext.save()
-                    print("updated and saved")
-                    
-                    let generateId = UUID()
-                    let result = ExpenseModel(id: id, title: titleTF.text, category: catTF.text, amount: Int((amountTF.text! as NSString).integerValue), date: dateTF.text, type: mySwitch.isOn ? false : true, createdAt: dateTF.text, updatedAt: dateTF.text)
-                    print("Result", result)
-                    
-                    self.dismiss(animated: true, completion: { [self] in
-                        self.delegate?.updateData(expense: result, index: self.index, checkValue: self.check, check: mySwitch.isOn ? false : true)
-                    })
-                }
-            } catch let error as NSError {
-                print("Could not save after updated. \(error), \(error.userInfo)")
-            }
-                
+            
+        }catch let error as NSError {
+            debugPrint("error", error)
+        }
     }
     
     @IBAction func backTapped(_ sender: Any) {

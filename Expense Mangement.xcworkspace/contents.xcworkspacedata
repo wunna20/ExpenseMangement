@@ -2,6 +2,12 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:Expense Mangement/Expenses+CoreDataClass.swift">
+   </FileRef>
+   <FileRef
+      location = "group:Expense Mangement/Expenses+CoreDataProperties.swift">
+   </FileRef>
+   <FileRef
       location = "group:Expense Mangement.xcodeproj">
    </FileRef>
    <FileRef
