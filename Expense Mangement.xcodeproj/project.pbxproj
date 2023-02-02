@@ -19,6 +19,8 @@
 		26130DB1294332C70077B0CA /* LoginVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26130DB0294332C70077B0CA /* LoginVC.swift */; };
 		26130DB3294332E10077B0CA /* RegisterVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26130DB2294332E10077B0CA /* RegisterVC.swift */; };
 		267545292948800D0013AD3C /* ExpenseModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 267545282948800D0013AD3C /* ExpenseModel.swift */; };
+		267811EB298BA103001CCA37 /* MonthYearWheelPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 267811EA298BA103001CCA37 /* MonthYearWheelPicker.swift */; };
+		267811EF298BBAEB001CCA37 /* Calculate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 267811EE298BBAEB001CCA37 /* Calculate.swift */; };
 		268C179B294B229900D0C008 /* UpdateExpenseVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 268C179A294B229900D0C008 /* UpdateExpenseVC.swift */; };
 		2699E1772953098C00753B24 /* DataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2699E1762953098B00753B24 /* DataModel.swift */; };
 		269D3EDE29529C100052ACAA /* AnalysisVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 269D3EDD29529C100052ACAA /* AnalysisVC.swift */; };
@@ -58,6 +60,8 @@
 		26130DB0294332C70077B0CA /* LoginVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginVC.swift; sourceTree = "<group>"; };
 		26130DB2294332E10077B0CA /* RegisterVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterVC.swift; sourceTree = "<group>"; };
 		267545282948800D0013AD3C /* ExpenseModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseModel.swift; sourceTree = "<group>"; };
+		267811EA298BA103001CCA37 /* MonthYearWheelPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthYearWheelPicker.swift; sourceTree = "<group>"; };
+		267811EE298BBAEB001CCA37 /* Calculate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Calculate.swift; sourceTree = "<group>"; };
 		268C179A294B229900D0C008 /* UpdateExpenseVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateExpenseVC.swift; sourceTree = "<group>"; };
 		2699E1762953098B00753B24 /* DataModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataModel.swift; sourceTree = "<group>"; };
 		269D3EDD29529C100052ACAA /* AnalysisVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalysisVC.swift; sourceTree = "<group>"; wrapsLines = 1; };
@@ -229,6 +233,8 @@
 			isa = PBXGroup;
 			children = (
 				26A6F1B4295D38A2004086D8 /* ToastMessage.swift */,
+				267811EA298BA103001CCA37 /* MonthYearWheelPicker.swift */,
+				267811EE298BBAEB001CCA37 /* Calculate.swift */,
 			);
 			path = Component;
 			sourceTree = "<group>";
@@ -388,6 +394,7 @@
 				26DFD47829667B99006E91A6 /* TaxVC.swift in Sources */,
 				26034B4A296FAEDC002D9526 /* PersonalIncomeTaxTableViewCell.swift in Sources */,
 				26E660E82946C70F00833CB5 /* RegisterModel.swift in Sources */,
+				267811EF298BBAEB001CCA37 /* Calculate.swift in Sources */,
 				26F3F7772949BCFE0070424E /* ExpenseMangement.xcdatamodeld in Sources */,
 				26130D992943303C0077B0CA /* AppDelegate.swift in Sources */,
 				26A2B235295A867900706DF3 /* CHCSVParser.m in Sources */,
@@ -403,6 +410,7 @@
 				2699E1772953098C00753B24 /* DataModel.swift in Sources */,
 				26A2F6832948390700752581 /* DrawerTableViewCell.swift in Sources */,
 				26E660EA2946C78E00833CB5 /* LoginModel.swift in Sources */,
+				267811EB298BA103001CCA37 /* MonthYearWheelPicker.swift in Sources */,
 				26A2B237295A87A500706DF3 /* SettingVC.swift in Sources */,
 				26130D9B2943303C0077B0CA /* SceneDelegate.swift in Sources */,
 				26130DB3294332E10077B0CA /* RegisterVC.swift in Sources */,

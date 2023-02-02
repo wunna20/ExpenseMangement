@@ -34,16 +34,19 @@ class AnalysisVC: UIViewController {
 
     let catArr = CreateExpenseVC().catExpenseArr
     let catIncomeArr = CreateExpenseVC().catIncomeArr
-    var catDataArr: [Int] = []
-    var catIncomeDataArr: [Int] = []
+    var catDataArr: [Any] = []
+    var catIncomeDataArr: [Any] = []
 
     var dateArray: [String] = []
     var dateExpenseArr: [Int] = []
     let dropDown = DropDown()
     var selected: Int = 0
     var totalDuplicate: Int = 0
+    var totalDate: [String] = []
     
-    var tmpArr = [String?: [ExpenseModel]].self
+    
+    var dataItem:[Expenses]?
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     @IBOutlet weak var vwDropDown: UIView!
     @IBOutlet weak var monthTitle: UILabel!
@@ -69,17 +72,21 @@ class AnalysisVC: UIViewController {
             selected = index
             print("Selected", selected)
             
+            calculateByCategory()
+            customizeChart(dataPoints: catArr, values: catDataArr.map{ $0 as! Int64 })
+            print("outer catData", catDataArr)
+            
             calculateDateByExpense()
             customizeBarChart(dataPoints: monthsArr, values: dateExpenseArr.map{ Double(Int($0)) })
+            
+            
+            calculateByIncomeCategory()
+            customizeIncomeCatPieChart(dataPoints: catIncomeArr, values: catIncomeDataArr.map{ $0 as! Int64 })
 
         }
-        readExpenseData()
-        calculateByCategory()
-        customizeChart(dataPoints: catArr, values: catDataArr.map{ Double(Int($0)) })
+        fetchExpense()
         
-        calculateByIncomeCategory()
-        customizeIncomeCatPieChart(dataPoints: catIncomeArr, values: catIncomeDataArr.map{ Double(Int($0)) })
-        
+        print("dataItem", dataItem as Any)
     }
     
     
@@ -98,11 +105,12 @@ class AnalysisVC: UIViewController {
 
         var dataBarEntries: [BarChartDataEntry] = []
         for i in 0..<dateExpenseArr.count {
-          let dataEntry = BarChartDataEntry(x: Double(i), y: Double(values[i]))
-//            self.barChartView.xAxis.valueFormatter = IndexAxisValueFormatter(values: ["hello"])
+            let dataEntry = BarChartDataEntry(x: Double(i), y: Double(values[i]))
             self.barChartView.xAxis.avoidFirstLastClippingEnabled = true
           dataBarEntries.append(dataEntry)
         }
+        print("bar date", totalDate)
+//        self.barChartView.xAxis.valueFormatter = IndexAxisValueFormatter(values: ["hello", "ng[rt"])
         
         
         let chartDataSet = BarChartDataSet(entries: dataBarEntries, label: "Bar Chart View")
@@ -113,14 +121,14 @@ class AnalysisVC: UIViewController {
         barChartView.xAxis.forceLabelsEnabled = true
     }
     
-    func customizeChart(dataPoints: [String], values: [Double]) {
+    func customizeChart(dataPoints: [String], values: [Int64]) {
 
         // 1. Set ChartDataEntry
         var dataEntries: [ChartDataEntry] = []
 
 
         for i in 0..<catArr.count {
-            let dataEntry = PieChartDataEntry(value: values[i], label: catArr[i], data:  catArr[i] as AnyObject)
+            let dataEntry = PieChartDataEntry(value: Double(values[i]), label: catArr[i], data: catArr[i] as AnyObject)
             dataEntries.append(dataEntry)
         }
 
@@ -154,13 +162,13 @@ class AnalysisVC: UIViewController {
         return colors
       }
     
-    func customizeIncomeCatPieChart(dataPoints: [String], values: [Double]) {
+    func customizeIncomeCatPieChart(dataPoints: [String], values: [Int64]) {
 
         // 1. Set ChartDataEntry
         var dataEntries: [ChartDataEntry] = []
 
         for i in 0..<catIncomeArr.count {
-            let dataEntry = PieChartDataEntry(value: values[i], label: catIncomeArr[i], data:  catIncomeArr[i] as AnyObject)
+            let dataEntry = PieChartDataEntry(value: Double(values[i]), label: catIncomeArr[i], data:  catIncomeArr[i] as AnyObject)
             dataEntries.append(dataEntry)
         }
         
@@ -182,44 +190,18 @@ class AnalysisVC: UIViewController {
         incomePieCartView.drawEntryLabelsEnabled = false
       }
 
-    		
-    //    read expense data
-    func readExpenseData() {
-        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {return}
-        let managedContext = appDelegate.persistentContainer.viewContext
-        let  fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Expenses")
-        let sort = NSSortDescriptor(key: #keyPath(Expenses.date), ascending: false)
-        fetchRequest.sortDescriptors = [sort]
 
+    func fetchExpense() {
         do {
-            guard let result = try managedContext.fetch(fetchRequest) as? [NSManagedObject] else {
-                return
-            }
-            print("Saved values")
-            for data in result {
-                print("AMOUNT", data.value(forKey: "amount") as? Int ?? "")
-
-                let obj = ExpenseModel(
-                    id: (data.value(forKey: "id") as? UUID),
-                    title: (data.value(forKey: "title") as! String),
-                    category: (data.value(forKey: "category") as! String),
-                    amount: (data.value(forKey: "amount") as? Int),
-                    date: (data.value(forKey: "date") as? String),
-                    type: (data.value(forKey: "type") as! Bool),
-                    createdAt: (data.value(forKey: "createdAt") as? String),
-                    updatedAt: (data.value(forKey: "updatedAt") as? String)
-                )
-
-                self.expenseArr.append(obj)
-            }
-
-
-        } catch let error as NSError {
-            debugPrint(error)
+            let request = Expenses.fetchRequest() as NSFetchRequest<Expenses>
+            let sort = NSSortDescriptor(key: #keyPath(Expenses.date), ascending: false)
+            request.sortDescriptors = [sort]
+            self.dataItem = try context.fetch(request)
+            
+        } catch {
+            print("error")
         }
     }
-
-    
     
     func calculateDateByExpense() {
         
@@ -227,62 +209,66 @@ class AnalysisVC: UIViewController {
         let date = Date()
         let calendar = Calendar.current
 
-        var year = calendar.component(.year, from: date)
-        var month = selected + 1
-        var day = calendar.component(.day, from: date)
     
-        let exp = expenseArr.filter{$0.type == true}
-        print("exp", exp)
+        let exp = dataItem?.filter{$0.type == true}
     
-        let testing = exp.filter{$0.date! >= "2023/0\(selected + 1)/01"}.filter{$0.date! <= "2023/0\(selected + 1)/31"}
+        let testing = exp!.filter{$0.date ?? "Hello" >= "2023/0\(selected + 1)/01"}.filter{$0.date ?? "Hello" <= "2023/0\(selected + 1)/31"}
         print("inner testing", testing)
        
         let crossReference = Dictionary(grouping: testing, by: \.date)
         print("cross", crossReference)
         
         var tmp = [Int]()
+
         for (key, value) in crossReference {
             totalDuplicate = 0
             for i in 0..<value.count {
-                totalDuplicate += value[i].amount ?? 0
+                totalDuplicate += Int(value[i].amount)
+                totalDate.append(value[i].date!)
                 print("totalDup", totalDuplicate)
-                print("value date", value)
+                print("value date", value[i].date as Any)
+                print("XXX", totalDate)
             }
             tmp.append(totalDuplicate)
-            
         }
-        print("calDate", tmp)
         dateExpenseArr = tmp
-
     }
 
     
     func calculateByCategory() {
 
-        let exp = expenseArr.filter{$0.type == true}.filter{$0.date! >= "2023/0\(selected + 1)/01"}.filter{$0.date! <= "2023/0\(selected + 1)/31"}
-
-        let foodPrice = exp.filter{$0.category == "Food"}.map{$0.amount!}.reduce(0, +)
-        let utilPrice = exp.filter{$0.category == "Utilities"}.map{$0.amount!}.reduce(0, +)
-        let insurancePrice = exp.filter{$0.category == "Insurance"}.map{$0.amount!}.reduce(0, +)
-        let medArrPrice = exp.filter{$0.category == "Medical & HealthCare"}.map{$0.amount!}.reduce(0, +)
-        let entArrPrice = exp.filter{$0.category == "Entertainment"}.map{$0.amount!}.reduce(0, +)
-        let perArrPirce = exp.filter{$0.category == "Personal Spending"}.map{$0.amount!}.reduce(0, +)
+      
+        let exp = dataItem?.filter{$0.type == true}.filter{$0.date ?? "Hello" >= "2023/0\(selected + 1)/01"}.filter{$0.date ?? "Hello" <= "2023/0\(selected + 1)/31"}
     
 
-        catDataArr += [foodPrice, utilPrice, insurancePrice, medArrPrice, entArrPrice, perArrPirce]
+        let foodPrice = exp?.filter{$0.category == "Food"}.map{$0.amount}.reduce(0, +)
+        let utilPrice = exp?.filter{$0.category == "Utilities"}.map{$0.amount}.reduce(0, +)
+        let insurancePrice = exp?.filter{$0.category == "Insurance"}.map{$0.amount}.reduce(0, +)
+        let medArrPrice = exp?.filter{$0.category == "Medical & HealthCare"}.map{$0.amount}.reduce(0, +)
+        let entArrPrice = exp?.filter{$0.category == "Entertainment"}.map{$0.amount}.reduce(0, +)
+        let perArrPirce = exp?.filter{$0.category == "Personal Spending"}.map{$0.amount}.reduce(0, +)
+        
+        var tmp = [Any]()
+
+        tmp.append(contentsOf: [foodPrice!, utilPrice!, insurancePrice!, medArrPrice!, entArrPrice!, perArrPirce!])
+        catDataArr = tmp
+        print("catDataArr", catDataArr)
     }
     
     func calculateByIncomeCategory() {
         
-        let exp = expenseArr.filter{$0.type == false}.filter{$0.date! >= "2023/0\(selected + 1)/01"}.filter{$0.date! <= "2023/0\(selected + 1)/31"}
-        print("filter income", exp.count)
+        let exp = dataItem?.filter{$0.type == false}.filter{$0.date ?? "Hello" >= "2023/0\(selected + 1)/01"}.filter{$0.date ?? "Hello" <= "2023/0\(selected + 1)/31"}
+      
         
-        let salPrice = exp.filter{$0.category == "Salary"}.map{$0.amount!}.reduce(0, +)
-        let giftPrice = exp.filter{$0.category == "Gift"}.map{$0.amount!}.reduce(0, +)
-        let bonusPrice = exp.filter{$0.category == "Bonus"}.map{$0.amount!}.reduce(0, +)
-        let awardPrice = exp.filter{$0.category == "Award"}.map{$0.amount!}.reduce(0, +)
+        let salPrice = exp?.filter{$0.category == "Salary"}.map{$0.amount}.reduce(0, +)
+        let giftPrice = exp?.filter{$0.category == "Gift"}.map{$0.amount}.reduce(0, +)
+        let bonusPrice = exp?.filter{$0.category == "Bonus"}.map{$0.amount}.reduce(0, +)
+        let awardPrice = exp?.filter{$0.category == "Award"}.map{$0.amount}.reduce(0, +)
         
-        catIncomeDataArr += [salPrice, giftPrice, bonusPrice, awardPrice]
+        var tmp = [Any]()
+        
+        tmp.append(contentsOf: [salPrice!, giftPrice!, bonusPrice!, awardPrice!])
+        catIncomeDataArr = tmp
         print("catIncomeDataArr", catIncomeDataArr)
         
     }

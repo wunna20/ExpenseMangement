@@ -89,7 +89,7 @@ class CreateExpenseVC: UIViewController, UINavigationControllerDelegate {
         dateTF.text = dateFormatter.string(from: datePicker.date)
         
         dateTF.isHidden = true
-        readExpenseData()
+        
         hideKeyboardWhenTappedAround()
     }
     
@@ -214,42 +214,6 @@ class CreateExpenseVC: UIViewController, UINavigationControllerDelegate {
             catErr.text = ""
         }
     
-    }
-    
-
-    
-    //    read expense data
-    func readExpenseData() {
-        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {return}
-        let managedContext = appDelegate.persistentContainer.viewContext
-        let  fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Expenses")
-        let sort = NSSortDescriptor(key: #keyPath(Expenses.date), ascending: false)
-        fetchRequest.sortDescriptors = [sort]
-       
-        do {
-            guard let result = try managedContext.fetch(fetchRequest) as? [NSManagedObject] else {
-                return
-            }
-            
-            for data in result {
-                print("AMOUNT", data.value(forKey: "amount") as? Int ?? "")
-                print("Saved values",data.objectID)
-                let obj = ExpenseModel(
-                    id: (data.value(forKey: "id")) as? UUID,
-                    title: (data.value(forKey: "title") as! String),
-                    category: (data.value(forKey: "category") as! String),
-                    amount: (data.value(forKey: "amount") as? Int),
-                    date: (data.value(forKey: "date") as? String),
-                    type: (data.value(forKey: "type") as! Bool),
-                    createdAt: (data.value(forKey: "createdAt") as? String),
-                    updatedAt: (data.value(forKey: "updatedAt") as? String)
-                )
-                
-                self.expenseArr.append(obj)
-            }
-        } catch let error as NSError {
-            debugPrint(error)
-        }
     }
 }
 

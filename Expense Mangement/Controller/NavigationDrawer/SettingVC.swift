@@ -14,13 +14,9 @@ protocol sendCSVData{
     func csvData(expense: ExpenseModel)
 }
 
-@available(iOS 14.0, *)
-@available(iOS 13.0, *)
-@available(iOS 14.0, *)
 class SettingVC: UIViewController, UIDocumentPickerDelegate {
     
     var delegate: sendCSVData?
-    
     var expenseArr = [ExpenseModel]()
     var uploadFileURL = ""
     var fileURL : URL? = URL(string: "www.apple.com")

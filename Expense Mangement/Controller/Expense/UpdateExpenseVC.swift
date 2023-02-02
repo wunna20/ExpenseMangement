@@ -39,22 +39,10 @@ class UpdateExpenseVC: UIViewController, UITextFieldDelegate {
     
     var expenseArr = [ExpenseModel]()
     var testArr = [ExpenseModel]()
-    var items:[NSManagedObject] = []
-    var filterIncItems: [NSManagedObject] = []
-    var filterExpItems: [NSManagedObject] = []
-    var filterMonthItems: [NSManagedObject] = []
-    var filterSelectMonth: [NSManagedObject] = []
-    var index:Int = 0
-    var id : UUID = UUID()
-    var title1 : String = ""
-    var amount : String = ""
-    var dateRes : String = ""
-    var category : String = ""
-    var type: String = ""
+
     
     var select: Int = 0
-    var selectMonth: Int = 0
-    
+   
     let catExpenseArr = CreateExpenseVC().catExpenseArr
     let catIncomeArr = CreateExpenseVC().catIncomeArr
 
@@ -70,27 +58,12 @@ class UpdateExpenseVC: UIViewController, UITextFieldDelegate {
         datePicker.semanticContentAttribute = .forceRightToLeft
         datePicker.subviews.first?.semanticContentAttribute = .forceRightToLeft
         
-        items = fetch()
-        
-        let item = items[self.index]
-        print("outer item", item)
-        
-        filterIncItems = filterIncomeFetch()
-        print("filter income", filterIncItems)
-        
-        filterExpItems = filterExpFetch()
-        print("filter exp", filterExpItems)
-        
-        print("check month", selectMonth)
-        fetchData.shared.selectMonth = selectMonth
-        
-        
         titleTF.text = updateItem.title
         amountTF.text = String(updateItem.amount)
         catTF.text = updateItem.category
         dateTF.text = updateItem.date
         
-        print("item id", id)
+
         print("selectMonth", select)
         print("check", check)
         
@@ -226,83 +199,7 @@ class UpdateExpenseVC: UIViewController, UITextFieldDelegate {
     }
 
 }
-@available(iOS 13.0, *)
 
-
-// using update item
-public func fetch ()->[NSManagedObject] {
-    var items:[NSManagedObject] = []
-    //1
-    guard let appDelegate =
-            UIApplication.shared.delegate as? AppDelegate else {
-        return items
-    }
-
-    let managedContext =
-        appDelegate.persistentContainer.viewContext
-
-    //2
-    let fetchRequest =
-        NSFetchRequest<NSManagedObject>(entityName: "Expenses")
-
-    //3
-    do {
-        items = try managedContext.fetch(fetchRequest)
-    } catch let error as NSError {
-        print("Could not fetch. \(error), \(error.userInfo)")
-    }
-    return items
-}
-
-@available(iOS 13.0, *)
-public func filterIncomeFetch ()->[NSManagedObject] {
-    var filterIncItems:[NSManagedObject] = []
-    //1
-    guard let appDelegate =
-            UIApplication.shared.delegate as? AppDelegate else {
-        return filterIncItems
-    }
-
-    let managedContext =
-        appDelegate.persistentContainer.viewContext
-    
-    let predicate = NSPredicate(format: "type = %@", false as NSNumber)
-
-    //2
-    let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Expenses")
-    fetchRequest.predicate = predicate
-
-    //3
-    do {
-        filterIncItems = try managedContext.fetch(fetchRequest)
-    } catch let error as NSError {
-        print("Could not fetch. \(error), \(error.userInfo)")
-    }
-    return filterIncItems
-}
-
-@available(iOS 13.0, *)
-public func filterExpFetch ()->[NSManagedObject] {
-    var filterExpItems:[NSManagedObject] = []
-    guard let appDelegate =
-            UIApplication.shared.delegate as? AppDelegate else {
-        return filterExpItems
-    }
-
-    let managedContext = appDelegate.persistentContainer.viewContext
-    
-    let predicate = NSPredicate(format: "type = %@", true as NSNumber)
-
-    let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Expenses")
-    fetchRequest.predicate = predicate
-
-    do {
-        filterExpItems = try managedContext.fetch(fetchRequest)
-    } catch let error as NSError {
-        print("Could not fetch. \(error), \(error.userInfo)")
-    }
-    return filterExpItems
-}
 
 
 
